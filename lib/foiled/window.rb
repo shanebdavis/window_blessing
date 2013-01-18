@@ -31,6 +31,7 @@ class Window
   end
 
   def area=(a)
+    return if a==@area
     request_redraw
     old_size = @area.size
     @buffer.size = a.size
@@ -101,7 +102,7 @@ class Window
   # redraw self if there was a recent call to request_redraw
   # draw to target_buffer if set
   # returns the internal_area that was updated
-  def draw(internal_area=nil, target_buffer=nil)
+  def draw(target_buffer=nil, internal_area=nil)
     internal_area ||= @requested_redraw_area
     return unless internal_area
     internal_area = internal_area | self.internal_area
@@ -110,7 +111,7 @@ class Window
     b.crop(internal_area) do
       b.fill background || ' '
       children.each do |child|
-        child.draw (b.crop_area - child.loc), b
+        child.draw b, (b.crop_area - child.loc)
       end
     end
     @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)

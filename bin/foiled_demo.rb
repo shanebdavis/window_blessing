@@ -2,18 +2,19 @@
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 
 Foiled.main do |main_window|
-  loc = point 10, 10
-  fb = Buffer.new(Point.new(10,5)).fill("!")
-  draw loc, fb
+#  raise main_window.inspect
+  (c1 = window(rect(10,10,15,7))).background='-='
+  main_window.add_child c1
+
   on_key do |key|
     case key
     when ?Q, ?q             then  break
-    when Curses::Key::UP    then loc.y-=1
-    when Curses::Key::DOWN  then loc.y+=1
-    when Curses::Key::LEFT  then loc.x-=1
-    when Curses::Key::RIGHT then loc.x+=1
+    when Curses::Key::UP    then c1.area += point(0,-1)
+    when Curses::Key::DOWN  then c1.area += point(0,1)
+    when Curses::Key::LEFT  then c1.area += point(-1,0)
+    when Curses::Key::RIGHT then c1.area += point(1,0)
     end
-    draw loc, fb
+    write point(0,2), "c1.area = #{c1.area}"
   end
 
   on_tick do

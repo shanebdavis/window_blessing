@@ -1,7 +1,7 @@
 =begin
 NOTE: Unlike bitmap graphics, it is often going to be faster to clone bitmap frames rather than do special logic to extract data from frames in-place. This is due the relatively small amount of data for a console-window "buffer" (cols * lines ~= a few kilobytes) and Ruby having optimized routines to handle strings as single units.
 
-For example, it's actually going to be faster to draw a sub-region from one buffer onto another by first copying out the subframe from the source buffer and then copying it into the target buffer.
+For example, it's actually going to be faster to draw a sub-region from one buffer onto another by first copying out the subbuffer from the source buffer and then copying it into the target buffer.
 
 NOTE: I'm just making intelligent guesses here. Haven't actually profiled. It keeps the code simpler, too.
 
@@ -13,6 +13,7 @@ class Buffer
   attr_accessor :size
   attr_accessor :contents
   attr_accessor :crop_area
+  attr_reader :dirty_area
 
   def initialize(size, init=nil)
     @contents = case init
@@ -76,7 +77,7 @@ class Buffer
     rect(size)
   end
 
-  def subframe(area)
+  def subbuffer(area)
     area = internal_area | area
     return buffer unless area.present?
 
@@ -87,6 +88,10 @@ class Buffer
     end)
   end
 
+  def dirty_subbuffer
+    @dirty_area && subbuffer(@dirty_area)
+  end
+
   #########
   # DRAWING
   #########
@@ -95,10 +100,23 @@ class Buffer
     fill ' '
   end
 
+  def dirty?
+    !!@dirty_area
+  end
+
+  def clean
+    @dirty_area = nil
+  end
+
+  def dirty(area)
+    @dirty_area = area & @dirty_area
+  end
+
   def fill(str)
     if cropped?
       draw_rect(crop_area,str)
     else
+      dirty internal_area
       line = fill_line(str, size.x)
       @contents = size.y.times.collect {line.clone}
       self
@@ -111,9 +129,10 @@ class Buffer
 
     unless source_area == buffer.internal_area
       loc += source_area.loc
-      buffer = buffer.subframe(source_area)
+      buffer = buffer.subbuffer(source_area)
     end
 
+    dirty rect(loc, buffer.size)
     @contents = overlay_span(loc.y, buffer.contents, contents) do |s, t|
       overlay_span loc.x, s, t
     end

@@ -24,8 +24,8 @@ describe "Buffer" do
     expect { buffer(point(4,4),{}) }.to raise_error
   end
 
-  it "subframe" do
-    test_frame.subframe(rect(1,1,2,2)).to_s.should == "34\n45"
+  it "subbuffer" do
+    test_frame.subbuffer(rect(1,1,2,2)).to_s.should == "34\n45"
   end
 
   it "array init" do
