@@ -5,7 +5,7 @@ See README for licence information.
 
 %w{
   tools
-  frame_buffer
+  buffer
   point
   rectangle
   version
@@ -19,28 +19,12 @@ module Foiled
   # Your code goes here...
 class << self
   include Tools
-  def test_screen
+  def main(&block)
+    main_window = Window.new
     Screen.new.open do
-      loc = point 10, 10
-      fb = FrameBuffer.new(Point.new(10,5)).fill("!")
-      draw loc, fb
-      on_key do |key|
-        case key
-        when ?Q, ?q             then  break
-        when Curses::Key::UP    then loc.y-=1
-        when Curses::Key::DOWN  then loc.y+=1
-        when Curses::Key::LEFT  then loc.x-=1
-        when Curses::Key::RIGHT then loc.x+=1
-        end
-        draw loc, fb
-      end
-
+      instance_eval &block
       on_tick do
-        time = Time.now
-        if time.sec != @last_sec
-          write point(0,0), time.to_s
-          @last_sec = time.sec
-        end
+        main_window.draw
       end
     end
   end

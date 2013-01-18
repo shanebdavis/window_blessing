@@ -1,13 +1,13 @@
 =begin
-NOTE: Unlike bitmap graphics, it is often going to be faster to clone bitmap frames rather than do special logic to extract data from frames in-place. This is due the relatively small amount of data for a console-window "frame" (cols * lines ~= a few kilobytes) and Ruby having optimized routines to handle strings as single units.
+NOTE: Unlike bitmap graphics, it is often going to be faster to clone bitmap frames rather than do special logic to extract data from frames in-place. This is due the relatively small amount of data for a console-window "buffer" (cols * lines ~= a few kilobytes) and Ruby having optimized routines to handle strings as single units.
 
-For example, it's actually going to be faster to draw a sub-region from one frame onto another by first copying out the subframe from the source frame and then copying it into the target frame.
+For example, it's actually going to be faster to draw a sub-region from one buffer onto another by first copying out the subframe from the source buffer and then copying it into the target buffer.
 
 NOTE: I'm just making intelligent guesses here. Haven't actually profiled. It keeps the code simpler, too.
 
 =end
 module Foiled
-class FrameBuffer
+class Buffer
   include Tools
 
   attr_accessor :size
@@ -39,7 +39,7 @@ class FrameBuffer
   end
 
   def inspect
-    "<FrameBuffer size:#{size.inspect}>"
+    "<Buffer size:#{size.inspect}>"
   end
 
   def to_s
@@ -78,11 +78,11 @@ class FrameBuffer
 
   def subframe(area)
     area = internal_area | area
-    return frame unless area.present?
+    return buffer unless area.present?
 
     x_range = area.x_range
 
-    frame area.size, (contents[area.y_range].collect do |line|
+    buffer area.size, (contents[area.y_range].collect do |line|
       line[x_range]
     end)
   end
@@ -105,16 +105,16 @@ class FrameBuffer
     end
   end
 
-  def draw_frame(loc, frame_buffer)
-    source_area = frame_buffer.internal_area | (crop_area - loc)
+  def draw_buffer(loc, buffer, source_area = nil)
+    source_area = (source_area || buffer.internal_area) | (crop_area - loc)
     return unless source_area.present?
 
-    unless source_area == frame_buffer.internal_area
+    unless source_area == buffer.internal_area
       loc += source_area.loc
-      frame_buffer = frame_buffer.subframe(source_area)
+      buffer = buffer.subframe(source_area)
     end
 
-    @contents = overlay_span(loc.y, frame_buffer.contents, contents) do |s, t|
+    @contents = overlay_span(loc.y, buffer.contents, contents) do |s, t|
       overlay_span loc.x, s, t
     end
     self
@@ -122,7 +122,7 @@ class FrameBuffer
 
   def draw_rect(rectangle, fill_string)
     rectangle = rectangle | crop_area if crop_area
-    draw_frame rectangle.loc, frame(rectangle.size).fill(fill_string)
+    draw_buffer rectangle.loc, buffer(rectangle.size).fill(fill_string)
   end
 
 end

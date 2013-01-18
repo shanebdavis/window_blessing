@@ -1,21 +1,27 @@
 module Foiled
 class Window
   include Tools
-  attr_reader :requested_redraw_area, :frame_buffer
+  attr_reader :requested_redraw_area, :buffer
 
 
   # you should never set the parent directly
   attr_accessor :parent
   attr_accessor :area
+  attr_accessor :background
 
   private
   attr_reader :children
 
   public
-  def initialize(area)
+  def initialize(area=rect(0,0,20,20))
     @area = area
-    @frame_buffer = FrameBuffer.new area.size
+    @buffer = Buffer.new area.size
+    @children = []
     request_internal_redraw
+  end
+
+  def inspect
+    "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
   end
 
   def loc; area.loc; end
@@ -27,7 +33,7 @@ class Window
   def area=(a)
     request_redraw
     old_size = @area.size
-    @frame_buffer.size = a.size
+    @buffer.size = a.size
     @area = a
     redraw_if_expanded old_size, a.size
     request_redraw
@@ -35,6 +41,11 @@ class Window
 
   def internal_area
     rect @area.size
+  end
+
+  def background=(b)
+    @background = b
+    request_internal_redraw
   end
 
   # you should never set the parent directly
@@ -56,8 +67,7 @@ class Window
   end
 
   def add_child(child)
-    @children ||= []
-    @children << child
+    children << child
     child.parent= self
     child.request_redraw
     child
@@ -74,39 +84,40 @@ class Window
   ################################
   # DRAWING
   ################################
-  private
 
   def request_internal_redraw(area = internal_area)
-    @requested_redraw_area = area & @requested_redraw_area
+    return if @requested_redraw_area && @requested_redraw_area.contains?(area)
+    @requested_redraw_area = (internal_area | area) & @requested_redraw_area
+    request_redraw area
   end
 
-  def redraw(area)
-    fb = frame_buffer
-    fb.crop(area) do
-      fb.clear
-      children && children.each {|child| child.draw fb}
-    end
-    @requested_redraw_area = nil if area.contains?(@requested_redraw_area)
-  end
-
-  public
-
-  # if area is nil, only ask the parent to redraw the area covered by this window
-  # if it isn't nil, set an internal redraw request AND request the parent redraw that area, too
+  # ask the parent to redraw all, or, if area is set, some of the area covered by this window
   def request_redraw(area = nil)
-    request_internal_redraw(area) if area
     area ||= internal_area
     area.loc += @area.loc
-    parent && parent.request_redraw(area)
+    parent && parent.request_internal_redraw(area)
   end
 
   # redraw self if there was a recent call to request_redraw
-  # draw to parent_frame_buffer if set
-  def draw(parent_frame_buffer=nil)
+  # draw to target_buffer if set
+  # returns the internal_area that was updated
+  def draw(internal_area=nil, target_buffer=nil)
+    internal_area ||= @requested_redraw_area
+    return unless internal_area
+    internal_area = internal_area | self.internal_area
 
-    redraw @requested_redraw_area if @requested_redraw_area
+    b = buffer
+    b.crop(internal_area) do
+      b.fill background || ' '
+      children.each do |child|
+        child.draw (b.crop_area - child.loc), b
+      end
+    end
+    @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)
 
-    parent_frame_buffer.draw_frame(loc, frame_buffer) if parent_frame_buffer
+    target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer
+
+    internal_area
   end
 end
 end

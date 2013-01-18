@@ -32,7 +32,11 @@ class Rectangle < Struct.new(:loc, :size)
   def y_range; y .. (y + h - 1) end
 
   def inspect
-    "rect(#{[loc.x,loc.y,size.x,size.y].join ','})"
+    "rect"+to_s
+  end
+
+  def to_s
+    "(#{[loc.x,loc.y,size.x,size.y].join ','})"
   end
 
   def overlaps?(b)

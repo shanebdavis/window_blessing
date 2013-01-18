@@ -40,6 +40,7 @@ module Tools
 
   def point(*args); Point.new *args end
   def rect(*args); Rectangle.new *args end
-  def frame(*args); FrameBuffer.new *args end
+  def buffer(*args); Buffer.new *args end
+  def window(*args); Window.new *args end
 end
 end

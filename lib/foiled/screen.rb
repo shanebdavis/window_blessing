@@ -8,11 +8,8 @@ class Screen
 
   def initialize
     @sleep_delay = 0.01
-    @on_key_block = lambda do |key|
-      case key
-      when ?Q, ?q then quit
-      end
-    end
+    @on_key_blocks = []
+    @on_tick_blocks = []
   end
 
   def quit
@@ -50,9 +47,9 @@ class Screen
     addstr text
   end
 
-  def draw(loc, frame_buffer)
+  def draw(loc, buffer)
     loc = loc.clone
-    frame_buffer.contents.each do |line|
+    buffer.contents.each do |line|
       setpos loc.y, loc.x
       addstr line
       loc.y += 1
@@ -63,17 +60,17 @@ class Screen
     @running = true
     while @running
       c = getch
-      @on_key_block.call(c) if c
-      @on_tick.call if @on_tick
+      @on_key_blocks.each {|b|b.call(c)} if c
+      @on_tick_blocks.each {|b|b.call}
       sleep sleep_delay
     end
   end
 
   def on_key(&block)
-    @on_key_block = block
+    @on_key_blocks << block
   end
   def on_tick(&block)
-    @on_tick = block
+    @on_tick_blocks << block
   end
 end
 end
