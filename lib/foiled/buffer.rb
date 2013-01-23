@@ -68,6 +68,7 @@ class Buffer
   end
 
   def size=(new_size)
+    return unless size != new_size
     @crop_area = rect new_size
     resize_y new_size.y
     resize_x new_size.x
@@ -123,6 +124,11 @@ class Buffer
     end
   end
 
+  def draw_rect(rectangle, fill_string)
+    rectangle = rectangle | crop_area if crop_area
+    draw_buffer rectangle.loc, buffer(rectangle.size).fill(fill_string)
+  end
+
   def draw_buffer(loc, buffer, source_area = nil)
     source_area = (source_area || buffer.internal_area) | (crop_area - loc)
     return unless source_area.present?
@@ -137,11 +143,6 @@ class Buffer
       overlay_span loc.x, s, t
     end
     self
-  end
-
-  def draw_rect(rectangle, fill_string)
-    rectangle = rectangle | crop_area if crop_area
-    draw_buffer rectangle.loc, buffer(rectangle.size).fill(fill_string)
   end
 
 end

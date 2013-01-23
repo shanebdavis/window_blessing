@@ -5,9 +5,8 @@ See README for licence information.
 
 %w{
   tools
+  color
   buffer
-  point
-  rectangle
   version
   screen
   window
@@ -25,9 +24,7 @@ class << self
       instance_exec(main_window, &block)
       on_tick do
         main_window.area = rect(screen_buffer.size)
-        write point(0,3), "main_window.requested_redraw_area = #{main_window.requested_redraw_area}"
         main_window.draw screen_buffer
-        write point(0,4), "screen_buffer.dirty_area = #{screen_buffer.dirty_area.inspect}"
       end
     end
   end

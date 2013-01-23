@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 
+
 Foiled.main do |main_window|
 #  raise main_window.inspect
   (c1 = window(rect(10,10,15,7))).background='-='
@@ -14,7 +15,6 @@ Foiled.main do |main_window|
     when Curses::Key::LEFT  then c1.area += point(-1,0)
     when Curses::Key::RIGHT then c1.area += point(1,0)
     end
-    write point(0,2), "c1.area = #{c1.area}"
   end
 
   on_tick do

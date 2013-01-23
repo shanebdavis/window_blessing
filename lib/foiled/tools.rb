@@ -1,5 +1,9 @@
+require "gui_geometry"
+
 module Foiled
 module Tools
+  include GuiGeometry::Tools
+
   # returns pos, span
   # on return, pos is within 0..length and pos + span.length is <= length
   def overlapping_span(pos, span, length)
@@ -29,19 +33,13 @@ module Tools
     end
   end
 
-  def min(a,b) a < b ? a : b; end
-  def max(a,b) a > b ? a : b; end
-  def bound(a,bounded,c) bounded < a ? a : (bounded > c) ? c : bounded; end
-
   def fill_line(fill, length)
     line = fill * (length/fill.length)
     line = (line+fill)[0..length-1] if line.length != length
     line
   end
 
-  def point(*args); Point.new *args end
-  def rect(*args); Rectangle.new *args end
-  def buffer(*args); Buffer.new *args end
-  def window(*args); Window.new *args end
+  def window(*args); Foiled::Window.new *args end
+  def buffer(*args); Foiled::Buffer.new *args end
 end
 end
