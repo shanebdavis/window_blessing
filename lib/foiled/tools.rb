@@ -2,7 +2,7 @@ require "gui_geometry"
 
 module Foiled
 module Tools
-  include GuiGeometry::Tools
+  include GuiGeo::Tools
 
   # returns pos, span
   # on return, pos is within 0..length and pos + span.length is <= length

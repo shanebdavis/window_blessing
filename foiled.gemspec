@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'highline'
-  gem.add_dependency 'gui_geometry', ">= 0.0.4"
+  gem.add_dependency 'gui_geometry', ">= 0.0.5"
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'guard-rspec'
