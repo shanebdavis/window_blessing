@@ -2,28 +2,6 @@ require "curses"
 require "highline"
 
 module Foiled
-module XTerm
-  # ref: http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-  def out(str)
-    $stdout.print str
-  end
-
-  def cursor(loc)
-    out "\e[#{loc.y},#{loc.x}H"
-  end
-
-  def clear
-    out "\e[2J"
-  end
-
-  def enable_mouse
-    "\e[?1003h"
-  end
-
-  def disable_mouse
-    "\e[?1003l"
-  end
-end
 
 class Screen
   include Curses

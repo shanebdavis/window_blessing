@@ -8,6 +8,7 @@ See README for licence information.
   color
   buffer
   version
+  xterm_screen
   screen
   window
 }.each do |file|
