@@ -8,8 +8,9 @@ See README for licence information.
   color
   buffer
   version
+  event_parser
+  xterm_input
   xterm_screen
-  screen
   window
 }.each do |file|
   require File.join(File.dirname(__FILE__),"foiled",file)

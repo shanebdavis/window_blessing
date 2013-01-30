@@ -1,11 +1,6 @@
-require "curses"
-require "highline"
-
 module Foiled
 
 class Screen
-  include Curses
-  include Tools
   attr_accessor :sleep_delay
   attr_accessor :screen_buffer
   attr_accessor :cursor_loc
@@ -24,20 +19,6 @@ class Screen
 
   def quit
     @running = false
-  end
-
-  def start_curses
-    noecho # do not show typed chars
-    nonl # turn off newline translation
-    stdscr.keypad(true) # enable arrow keys
-    raw # give us all other keys
-    stdscr.nodelay = 1 # do not block -> we can use timeouts
-    init_screen
-  end
-
-  def end_curses
-    clear # needed to clear the menu/status bar on windows
-    close_screen
   end
 
   def open(&block)
