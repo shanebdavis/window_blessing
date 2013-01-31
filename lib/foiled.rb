@@ -9,6 +9,10 @@ See README for licence information.
   buffer
   version
   event_parser
+  event_manager
+  xterm_log
+  xterm_output
+  xterm_state
   xterm_input
   xterm_screen
   window
