@@ -77,5 +77,32 @@ describe "Buffer" do
       f1.draw_buffer(point(1,1),f2)
     end.to_s.should == "1234\n2ab5\n3456\n4567"
   end
+
+  it "dirty" do
+    f1 = test_frame
+    f1.dirty?.should == false
+    f1.dirty rect(1,2,3,4)
+    f1.dirty?.should == true
+
+    f1.dirty_area.should == rect(1,2,3,2)
+
+    s = f1.dirty_subbuffer
+    s.to_s.should == "456\n567"
+
+    f1.clean
+    f1.dirty?.should == false
+  end
+
+  it "on_dirty" do
+    f1 = test_frame
+
+    is_now_dirty = false
+    f1.on_dirty do
+      is_now_dirty = true
+    end
+    is_now_dirty.should == false
+    f1.dirty
+    is_now_dirty.should == true
+  end
 end
 end

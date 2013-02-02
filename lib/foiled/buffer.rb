@@ -113,10 +113,10 @@ class Buffer
     @dirty_area = nil
   end
 
-  def dirty(area)
-    @dirty_area = area & @dirty_area
+  def dirty(area = internal_area)
+    @dirty_area = (area & @dirty_area) | internal_area
     @on_dirty.call if @on_dirty
-    @dirty_Area
+    @dirty_area
   end
 
   def fill(str)
