@@ -3,8 +3,7 @@ class XtermState
   attr_accessor :state
 
   def initialize(event_manager)
-    @size = point(-1,-1)
-    @state = {}
+    @state = {:size => point(-1,-1)}
 
     event_manager.add_handler :xterm_state do |event|
       state_type = event[:state_type]
