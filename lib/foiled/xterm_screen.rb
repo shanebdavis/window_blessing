@@ -3,10 +3,9 @@ class XtermScreen
   include GuiGeo
   include GuiGeo::Tools
 
-  attr_accessor :screen_size, :input, :output, :event_manager, :state
+  attr_accessor :input, :output, :event_manager, :state
 
   def initialize
-    @screen_size = point(10,10)
     @event_manager = EventManager.new
     @state = XtermState.new @event_manager
     @input = XtermInput.new
@@ -34,12 +33,16 @@ class XtermScreen
     end
   end
 
+  def initialize_screen
+    output.request_state_update
+    process_events
+    yield self
+  end
+
   # run xterm raw-session
-  def start(with_mouse=false)
+  def start(with_mouse=false, &block)
     output.clean_screen(with_mouse) do
-      output.request_state_update
-      process_events
-      yield self
+      initialize_screen &block
       event_loop
     end
   end

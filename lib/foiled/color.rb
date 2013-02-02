@@ -10,17 +10,17 @@ module Color
   end
 
   def set_color(fg, bg=nil)
-    print "\x1b[38;5;#{bound(0,fg.to_i,255)}m" if fg
-    print "\x1b[48;5;#{bound(0,bg.to_i,255)}m" if bg
+    out "\x1b[38;5;#{bound(0,fg.to_i,255)}m" if fg
+    out "\x1b[48;5;#{bound(0,bg.to_i,255)}m" if bg
   end
 
   def reset_color
-    print "\x1b[0m"
+    out "\x1b[0m"
   end
 
-  def print_color(txt, fg, bg)
+  def out_color(txt, fg, bg)
     set_color(fg, bg)
-    print txt
+    out txt
     reset_color
   end
 end

@@ -26,6 +26,10 @@ class Buffer
     self.size = size
   end
 
+  def on_dirty(&block)
+    @on_dirty = block
+  end
+
   def crop(area)
     old_crop_area = @crop_area
     @crop_area = area | (old_crop_area || area)
@@ -111,6 +115,8 @@ class Buffer
 
   def dirty(area)
     @dirty_area = area & @dirty_area
+    @on_dirty.call if @on_dirty
+    @dirty_Area
   end
 
   def fill(str)
