@@ -7,10 +7,10 @@ class XtermScreen
 
   def initialize
     @screen_size = point(10,10)
-    @input = XtermInput.new
-    @output = XtermOutput.new
     @event_manager = EventManager.new
     @state = XtermState.new @event_manager
+    @input = XtermInput.new
+    @output = XtermOutput.new(@state)
     @running = true
     @pending_events = []
 

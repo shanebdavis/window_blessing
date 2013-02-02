@@ -4,6 +4,11 @@
 module Foiled
 class XtermOutput
   include Color
+  attr_accessor :xterm_state
+
+  def initialize(xterm_state)
+    @xterm_state = xterm_state
+  end
 
   # cursor 0, 0 is the upper left hand corner
   # cursor point(0, 0) is also accepted
@@ -28,7 +33,11 @@ class XtermOutput
 
   # convert all \n to \n\r
   def puts(s=nil)
-    out "#{s}\n".gsub("\n", "\n\r")
+    width = xterm_state.size.x
+    lines = "#{s}\n".split("\n").collect do |line|
+      line + " " * (width - (line.length % width))
+    end
+    out lines.flatten.join "\n"
   end
 
   def clear; out "\e[2J"; end
@@ -104,8 +113,8 @@ class XtermOutput
   def echo_on; system "stty -raw echo"; end
 
   # This seems to work - or at least it does SOMETHING
-  def insert_mode; out "\e[4m"; end
-  def replace_mode; out "\e[4l"; end
+  # def insert_mode; out "\e[4m"; end
+  # def replace_mode; out "\e[4l"; end
 
 end
 end

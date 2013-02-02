@@ -113,7 +113,29 @@ class EventParser < BabelBridge::Parser
       s, x, y = state.to_s.unpack "CCC"
       x -= 33
       y -= 33
-      {:type => :mouse, state:s, x:x, y:y}
+      button_actions = {
+        32 => :button1_down, 33 => :button2_down, 34=> :button3_down, 35=>:button_up,
+        64 => :drag,
+        96 => :wheel_down, 97 => :wheel_up
+      }
+      {
+        type: :mouse,
+        button: button_actions[s&99],
+        state: s,
+        x: x,
+        y: y
+      }.tap do |h|
+        h[:shift_down] = true if (s&4)!=0
+        h[:alt_down] = true if (s&8)!=0
+        h[:control_down] = true if (s&16)!=0
+      end
+    end
+  end
+
+  # catch-all for unknown xterm escape codes
+  rule :event, /\e\[[^a-zA-Z]*[a-zA-Z]/ do
+    def event
+      {:type => :unknown_xterm_code}
     end
   end
 end
