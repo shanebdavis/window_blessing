@@ -14,13 +14,17 @@ class XtermOutput
 
   # raw screen output
   def out(str)
-    $stdout.print str.to_s
+    $stdout.print s = str.to_s
+    s
   end
 
   def out_at(loc, str)
     cursor(loc)
     out str
   end
+
+  def show_cursor; out "\e[?25h"; end
+  def hide_cursor; out "\e[?25l"; end
 
   # convert all \n to \n\r
   def puts(s=nil)
@@ -40,9 +44,18 @@ class XtermOutput
   # This returns the entire screen size in pixels - not just the pixel-size of the x-term
   def request_display_pixel_size; out "\e[14t"; end
 
+  def request_cursor_position; out "\e[?6n"; end
+
   def request_state_update
     request_xterm_size
     request_display_pixel_size
+  end
+
+  def reset_all
+    disable_mouse
+    reset_color
+    show_cursor
+    echo_on
   end
 
   def clean_screen(with_mouse=false)
@@ -52,12 +65,18 @@ class XtermOutput
 
     yield self
   ensure
-    disable_mouse if with_mouse
-    reset_color
-    echo_on
+    reset_all
     puts "#{self.class}::clean_screen: Done."
 #    clear
 #    cursor point(0,0)
+  end
+
+  # execute passed in block with the cursor hidden, then re-show it
+  def without_cursor
+    hide_cursor
+    yield self
+  ensure
+    show_cursor
   end
 
   # TODO: find out what stty raw -echo sends to xterm

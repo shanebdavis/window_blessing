@@ -7,9 +7,11 @@ Foiled::XtermScreen.new.start(false) do |screen|
     last_event = nil
     add_handler :tick do
       screen.output.instance_eval do
-        out_at point(0,0), Time.now
-        out_at point(0,1), "size: #{screen.state.size.inspect}"
-        out_at point(0,2), last_event.inspect
+        without_cursor do
+          out_at point(0,0), Time.now
+          out_at point(0,1), "size: #{screen.state.size.inspect}"
+          out_at point(0,2), last_event.inspect
+        end
       end
     end
     add_handler :all do |event|
