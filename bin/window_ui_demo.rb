@@ -2,32 +2,27 @@
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 include GuiGeo
 
-Foiled::WindowUI.new.start(true) do |screen|
-  event_manager = screen.event_manager
+Foiled::WindowUI.new.start(true) do |win|
+  r = rect 10, 10, 6, 3
 
-  last_event = nil
-  event_count = 0
+  win.screen_buffer.draw_rect r, "%"
 
-  event_manager.add_handler :tick do
-    screen.output.instance_eval do
-      without_cursor do
-        cursor(0,0)
-        puts Time.now
-        puts "size: #{screen.state.size.inspect}"
-
-        if last_event
-          e = last_event.inspect
-          e += "\nfailure_info (raw=#{last_event[:raw].inspect}): #{last_event[:failure_info]}" if last_event[:failure_info]
-          e += "\ntrace:\n  "+last_event[:exception].backtrace.join("\n  ") if last_event[:type]==:event_exception
-          puts "event #{event_count}: #{e}   "
-        end
-      end
+  win.event_manager.add_handler :key_press do |event|
+    old_r = r | r
+    Foiled::XtermLog.log "key_press: #{event[:key]}"
+    case event[:key]
+    when :home then r.loc.x = 0
+    when :page_up then r.loc.y = 0
+    when :left then r.loc.x -= 1
+    when :right then r.loc.x += 1
+    when :up then r.loc.y -= 1
+    when :down then r.loc.y += 1
     end
-  end
-
-  em.add_handler :all do |event|
-    event_count += 1
-    Foiled::XtermLog.log "last_event = #{event.inspect}"
-    last_event = event
+    Foiled::XtermLog.log "r = #{r} old_r = #{old_r}"
+    if r != old_r
+      win.screen_buffer.draw_rect old_r, " "
+      win.screen_buffer.draw_rect r, "%"
+      win.dirty(old_r & r)
+    end
   end
 end

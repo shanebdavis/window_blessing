@@ -76,7 +76,7 @@ class EventParser < BabelBridge::Parser
       6 => [:shift, :control],
       7 => [:alt, :control],
       8 => [:shift, :alt, :control],
-      }[numbers[-1].to_i]
+      }[numbers.to_a[-1].to_i]
     end
   end
 

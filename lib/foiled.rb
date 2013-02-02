@@ -16,6 +16,7 @@ See README for licence information.
   xterm_input
   xterm_screen
   window
+  window_ui
 }.each do |file|
   require File.join(File.dirname(__FILE__),"foiled",file)
 end
