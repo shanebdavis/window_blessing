@@ -15,10 +15,11 @@ module Foiled
 #   :event_exception => if an exception escaped the event handler, a new event is handed to this handler. New event looks like this:
 #       :type => :event_exception, :event => original_event.clone, :exception => exception_caught, :handler => handler_that_threw_error
 class EventManager
-  attr_accessor :event_handlers
+  attr_accessor :event_handlers, :events
 
   def initialize
     @event_handlers = {}
+    clear_events
     add_handler(:unhandled_event){}
     add_handler(:event_exception){}
     add_handler(:all){}
@@ -29,12 +30,12 @@ class EventManager
     event_handlers[event_type] << block
   end
 
-  def send_to_each_handler(handlers, event, stop_on_true = true)
+  def send_to_each_handler(handlers, event)
     raise "hell" if !handlers && event[:type] == :unhandled_event
     return handle_event :type => :unhandled_event, :event => event.clone unless handlers
 
     handlers.reverse_each do |handler|
-      break unless begin
+      begin
         handler.call event
       rescue Exception => e
         if event[:type] != :event_exception
@@ -43,18 +44,26 @@ class EventManager
           XtermLog.log "exception in :event_exception handler: #{e.inspect}"
         end
         false
-      end && stop_on_true
+      end
     end
   end
 
   def handle_event(event)
     type = event[:type]
-    send_to_each_handler(event_handlers[:all], event, false) unless type == :tick
+    send_to_each_handler(event_handlers[:all], event) unless type == :tick || type == :unhandled_event
     send_to_each_handler(event_handlers[type], event)
   end
 
-  def handle_events(events)
+  def add_event(event) @events << event end
+  def add_events(events) @events += events end
+
+  def clear_events
+    @events = []
+  end
+
+  def handle_events
     events.each {|event| handle_event(event)}
+    clear_events
     handle_event :type => :tick
   end
 end

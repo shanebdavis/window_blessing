@@ -16,7 +16,7 @@ class XtermInput
         events += new_events
         new_events.length
       else
-        events << {:type => :event_parser_failure, :failure_info => event_parser.parser_failure_info}
+        events << {:type => :event_parser_failure, :failure_info => event_parser.parser_failure_info, :raw => raw}
       end
     end
     events

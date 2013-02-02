@@ -38,6 +38,9 @@ class EventParser < BabelBridge::Parser
     end
   end
 
+  rule(:event, "\e[O")                {def event;{:type => :blur};end}
+  rule(:event, "\e[I")                {def event;{:type => :focus};end}
+
   rule :event, :key_press do
     def event; {:type => :key_press, :key => key, :modifiers => modifiers} end
 

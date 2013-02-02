@@ -35,6 +35,8 @@ class XtermOutput
 
   def enable_mouse; out "\e[?1003h"; end
   def disable_mouse; out "\e[?1003l"; end
+  def enable_focus_events; out "\e[?1004h" end
+  def disable_focus_events; out "\e[?1004l" end
 
   # INTERNAL NOTE: xterm returns 3 numbers: ?, height, width
   # Xterm sends back response as an escape sequence. EventParser knows how to capture and interpret the result.
@@ -51,8 +53,20 @@ class XtermOutput
     request_display_pixel_size
   end
 
+  def enable_resize_events
+    Signal.trap "SIGWINCH" do
+      request_xterm_size
+    end
+  end
+
+  def disable_resize_events
+    Signal.trap "SIGWINCH", "DEFAULT"
+  end
+
   def reset_all
+    disable_focus_events
     disable_mouse
+    disable_resize_events
     reset_color
     show_cursor
     echo_on
@@ -62,6 +76,8 @@ class XtermOutput
     echo_off
     clear
     enable_mouse if with_mouse
+    enable_focus_events
+    enable_resize_events
 
     yield self
   ensure

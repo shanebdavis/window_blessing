@@ -10,7 +10,14 @@ Foiled::XtermScreen.new.start(false) do |screen|
         without_cursor do
           out_at point(0,0), Time.now
           out_at point(0,1), "size: #{screen.state.size.inspect}"
-          out_at point(0,2), last_event.inspect
+
+          if last_event
+            e = last_event.inspect
+            e += "\nfailure_info (raw=#{last_event[:raw].inspect}): #{last_event[:failure_info]}" if last_event[:failure_info]
+            e += "\ntrace:\n  "+last_event[:exception].backtrace.join("\n  ") if last_event[:type]==:event_exception
+            cursor(0,2)
+            puts "last_event: #{e}   "
+          end
         end
       end
     end

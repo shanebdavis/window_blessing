@@ -12,6 +12,7 @@ class XtermScreen
     @event_manager = EventManager.new
     @state = XtermState.new @event_manager
     @running = true
+    @pending_events = []
 
     @event_manager.add_handler :characters do |event|
       quit if event[:raw][/q/]
@@ -21,13 +22,9 @@ class XtermScreen
   def quit; @running = false; end
   def running?; @running; end
 
-  def update_state
-    output.request_state_update
-    process_events
-  end
-
   def process_events
-    event_manager.handle_events input.read_events
+    event_manager.add_events input.read_events
+    event_manager.handle_events
   end
 
   def event_loop
@@ -40,7 +37,8 @@ class XtermScreen
   # run xterm raw-session
   def start(with_mouse=false)
     output.clean_screen(with_mouse) do
-      update_state
+      output.request_state_update
+      process_events
       yield self
       event_loop
     end
