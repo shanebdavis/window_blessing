@@ -15,6 +15,9 @@ class Buffer
   attr_accessor :crop_area
   attr_reader :dirty_area
 
+  # color buffers. 2D arrays. Each element is a number, 0-255.
+  attr_accessor :fg_buffer, :bg_buffer
+
   def Buffer.default_bg; 0; end
   def Buffer.default_fg; 7; end
 
