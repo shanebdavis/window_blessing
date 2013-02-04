@@ -81,9 +81,19 @@ class XtermOutput
     echo_on
   end
 
+  def enter_alternate_screen
+    out "\e7"
+    out "\e[?47h"
+  end
+
+  def exit_alternate_screen
+    out "\e[?47l"
+    out "\e8"
+  end
+
   def clean_screen(with_mouse=false)
     echo_off
-    clear
+    enter_alternate_screen
     enable_mouse if with_mouse
     enable_focus_events
     enable_resize_events
@@ -91,9 +101,14 @@ class XtermOutput
     yield self
   ensure
     reset_all
+    exit_alternate_screen
     puts "#{self.class}::clean_screen: Done."
-#    clear
-#    cursor point(0,0)
+  end
+
+  def alternate_screen
+    yield
+  ensure
+    out "\e[?47l"
   end
 
   # execute passed in block with the cursor hidden, then re-show it

@@ -53,11 +53,8 @@ class XtermScreen
   # run xterm raw-session
   def start(with_mouse=false, &block)
     output.clean_screen(with_mouse) do
-    XtermLog.log "start 1"
       initialize_screen &block
-    XtermLog.log "start 2"
       event_loop
-    XtermLog.log "start 3"
     end
   end
 end

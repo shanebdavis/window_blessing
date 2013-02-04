@@ -46,6 +46,13 @@ class WindowUI < XtermScreen
   #  super *args, &block
   #end
 
+  # run xterm raw-session
+  def start(with_mouse=false, &block)
+    output.without_cursor do
+      super
+    end
+  end
+
   def update_from_screen_buffer
     if dirty_buffer = screen_buffer.dirty_subbuffer
       XtermLog.log "diry_area: #{screen_buffer.dirty_area}"

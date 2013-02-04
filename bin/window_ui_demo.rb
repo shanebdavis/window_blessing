@@ -13,12 +13,15 @@ Foiled::WindowUI.new.start(true) do |win|
     case event[:key]
     when :home then r.loc.x = 0
     when :page_up then r.loc.y = 0
+    when :page_down then r.loc.y = win.state.size.y
+    when :end then r.loc.x = win.state.size.x
     when :left then r.loc.x -= 1
     when :right then r.loc.x += 1
     when :up then r.loc.y -= 1
     when :down then r.loc.y += 1
     end
     Foiled::XtermLog.log "r = #{r} old_r = #{old_r}"
+    r = rect(win.state.size).bound(r)
     if r != old_r
       win.screen_buffer.draw_rect old_r, " "
       win.screen_buffer.draw_rect r, "%"
