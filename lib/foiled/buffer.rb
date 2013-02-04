@@ -15,7 +15,10 @@ class Buffer
   attr_accessor :crop_area
   attr_reader :dirty_area
 
-  def initialize(size, init=nil)
+  def Buffer.default_bg; 0; end
+  def Buffer.default_fg; 7; end
+
+  def initialize(size, init=nil, bg_color = Buffer.default_bg, fg_color = Buffer.default_fg)
     @contents = case init
     when String then init.gsub("\t"," "*tab_size).split("\n")
     when Array then init
@@ -23,7 +26,18 @@ class Buffer
     else raise ArgumentError.new "invalid initailizer: #{init.inspect}"
     end
     @size = point
+    @fg_buffer = []
+    @bg_buffer = []
     self.size = size
+  end
+
+  def size=(new_size)
+    return unless size != new_size
+    @size = new_size
+    @crop_area = rect new_size
+    @contents = resize2d @contents, size, " "
+    @fg_buffer = resize2d @bg_buffer, size, Buffer.default_bg
+    @bg_buffer = resize2d @bg_buffer, size, Buffer.default_fg
   end
 
   def on_dirty(&block)
@@ -53,29 +67,6 @@ class Buffer
 
   def tab_size
     2
-  end
-
-  def resize_y(y)
-    raise ArgumentError.new("y must be >= 1") unless y >= 1
-    @size.y = y
-    @contents = contents[0..y-1]
-    @contents += (y - contents.length).times.collect {""}
-  end
-
-  def resize_x(x)
-    raise ArgumentError.new("x must be >= 1") unless x >= 1
-    @size.x = x
-    contents.collect! do |line|
-      line = line[0..x-1]
-      line += " " * (x - line.length)
-    end
-  end
-
-  def size=(new_size)
-    return unless size != new_size
-    @crop_area = rect new_size
-    resize_y new_size.y
-    resize_x new_size.x
   end
 
   def internal_area
@@ -145,9 +136,7 @@ class Buffer
     end
 
     dirty rect(loc, buffer.size)
-    @contents = overlay_span(loc.y, buffer.contents, contents) do |s, t|
-      overlay_span loc.x, s, t
-    end
+    @contents = overlay2d(loc, buffer.contents, contents)
     self
   end
 

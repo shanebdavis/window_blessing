@@ -33,6 +33,31 @@ module Tools
     end
   end
 
+  def overlay2d(loc, source, target)
+    overlay_span(loc.y, source, target) do |s, t|
+      overlay_span loc.x, s, t
+    end
+  end
+
+  def resize2d(buffer, size, blank_element)
+    blank_element = [blank_element] unless blank_element.kind_of?(String)
+
+    if buffer.length != size.y
+      buffer = buffer[0..(size.y-1)]
+      blank_line = blank_element * size.x
+      buffer << blank_line.clone while buffer.length < size.y
+    end
+
+    buffer.collect do |line|
+      if line.length!=size.x
+        line = line[0..(size.x-1)]
+        line + blank_element * (size.x - line.length)
+      else
+        line
+      end
+    end
+  end
+
   def fill_line(fill, length)
     line = fill * (length/fill.length)
     line = (line+fill)[0..length-1] if line.length != length

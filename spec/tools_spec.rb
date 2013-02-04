@@ -76,5 +76,35 @@ describe "Tools" do
     fill_line("ab", 1).should == "a"
     fill_line("ab", 0).should == ""
   end
+
+  it "resize2d string" do
+    r = resize2d([],point(2,3),"1")
+    r.should == ["11", "11", "11"]
+
+    r = resize2d(r,point(3,3),"2")
+    r.should == ["112", "112", "112"]
+
+    r = resize2d(r,point(3,2),"3")
+    r.should == ["112", "112"]
+
+    r = ["1","22","333"]
+    r = resize2d(r,point(3,4),"-")
+    r.should == ["1--", "22-", "333", "---"]
+  end
+
+  it "resize2d array" do
+    r = resize2d([],point(2,3),1)
+    r.should == [[1, 1], [1, 1], [1, 1]]
+
+    r = resize2d(r,point(3,3),2)
+    r.should == [[1, 1, 2], [1, 1, 2], [1, 1, 2]]
+
+    r = resize2d(r,point(3,2),3)
+    r.should == [[1, 1, 2], [1, 1, 2]]
+
+    r = [[1],[2,2],[3,3,3]]
+    r = resize2d(r,point(3,4),4)
+    r.should == [[1, 4, 4], [2, 2, 4], [3, 3, 3], [4, 4, 4]]
+    end
 end
 end
