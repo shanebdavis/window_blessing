@@ -19,13 +19,31 @@ class XtermOutput
 
   # raw screen output
   def out(str)
-    $stdout.print s = str.to_s
-    s
+    $stdout.print str
+    str
   end
 
   def out_at(loc, str)
     cursor(loc)
     out str
+  end
+
+  def out_at_with_color(loc, str, fg, bg)
+    XtermLog.log "out_at_with_color input = "+ [str, fg, bg].inspect + " zip=" + str.chars.zip(fg,bg).inspect
+    cursor loc
+    str.chars.zip(fg,bg).each do |c,f,b|
+#      XtermLog.log "out_at_with_color #{[c,f,b].inspect}"
+      set_color f, b
+      out c
+    end
+  end
+
+  def draw_buffer(loc, buffer)
+    loc = loc.clone
+    buffer.each_line do |line,fg,bg|
+      out_at_with_color loc, line, fg, bg
+      loc.y += 1
+    end
   end
 
   def show_cursor; out "\e[?25h"; end
@@ -103,7 +121,7 @@ class XtermOutput
   ensure
     reset_all
     exit_alternate_screen
-    puts "#{self.class}::clean_screen: Done."
+    $stdout.puts "#{self.class}::clean_screen: Done."
   end
 
   def alternate_screen

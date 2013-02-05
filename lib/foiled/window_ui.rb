@@ -25,27 +25,6 @@ class WindowUI < XtermScreen
     @running = false
   end
 
-  def open(&block)
-    start_curses
-    instance_eval &block
-    event_loop
-  ensure
-    end_curses
-  end
-
-  def draw(loc, buffer)
-    loc = loc.clone
-    buffer.contents.each do |line|
-      output.out_at loc, line
-      loc.y += 1
-    end
-  end
-
-  #def initialize_screen(*args,&block)
-  #  screen_buffer.clear
-  #  super *args, &block
-  #end
-
   # run xterm raw-session
   def start(with_mouse=false, &block)
     output.without_cursor do
@@ -56,7 +35,7 @@ class WindowUI < XtermScreen
   def update_from_screen_buffer
     if dirty_buffer = screen_buffer.dirty_subbuffer
       XtermLog.log "#{self.class}#update_from_screen_buffer() diry_area: #{screen_buffer.dirty_area}"
-      draw screen_buffer.dirty_area.loc, dirty_buffer
+      output.draw_buffer screen_buffer.dirty_area.loc, dirty_buffer
       screen_buffer.clean
     end
   end

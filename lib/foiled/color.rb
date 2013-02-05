@@ -1,7 +1,8 @@
 module Foiled
 module Color
+
   def rgb_to_screen_color(red, green, blue)
-    16 + (red * 36) + (green * 6) + blue
+    16 + (red*5.9).to_i * 36 + (green*5.9).to_i * 6 + (blue*5.9).to_i
   end
 
   # g is 0..1
@@ -10,8 +11,8 @@ module Color
   end
 
   def set_color(fg, bg=nil)
-    out "\x1b[38;5;#{bound(0,fg.to_i,255)}m" if fg
-    out "\x1b[48;5;#{bound(0,bg.to_i,255)}m" if bg
+    out "\x1b[38;5;#{fg}m" if fg
+    out "\x1b[48;5;#{bg}m" if bg
   end
 
   def reset_color

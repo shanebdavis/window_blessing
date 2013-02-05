@@ -26,7 +26,7 @@ class XtermScreen
     while event_manager.events.length==0 && count > 0
       event_manager.add_events input.read_events
       count -= 1
-      sleep 0
+      sleep 0.01
     end
     raise "no events!" unless event_manager.events.length > 0
   end

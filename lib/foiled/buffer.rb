@@ -45,6 +45,10 @@ class Buffer
     clean
   end
 
+  def each_line(&block)
+    @contents.zip(fg_buffer,bg_buffer).each &block
+  end
+
   def normalize
     @contents  = resize2d @contents , size, " "
     @fg_buffer = resize2d @fg_buffer, size, Buffer.default_fg

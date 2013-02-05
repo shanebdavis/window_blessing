@@ -122,8 +122,7 @@ class EventParser < BabelBridge::Parser
         type: :mouse,
         button: button_actions[s&99],
         state: s,
-        x: x,
-        y: y
+        loc: point(x,y)
       }.tap do |h|
         h[:shift_down] = true if (s&4)!=0
         h[:alt_down] = true if (s&8)!=0
