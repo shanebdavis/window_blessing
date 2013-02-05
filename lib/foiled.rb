@@ -5,7 +5,6 @@ See README for licence information.
 
 %w{
   tools
-  color
   buffer
   version
   event_parser

@@ -47,15 +47,53 @@ class XtermScreen
     output.request_state_update
     wait_for_events
     process_events
-    yield self
   end
 
   # run xterm raw-session
-  def start(with_mouse=false, &block)
-    output.clean_screen(with_mouse) do
-      initialize_screen &block
+  # options
+  #
+  def start(options={})
+    clean_screen(options) do
+      initialize_screen
+      yield self
       event_loop
     end
   end
+
+
+  # options
+  #   :mouse => true
+  #   :no_cursor => true
+  #   :alternate_screen => true
+  #   :full => true (enables all features)
+  def clean_screen(options = {})
+    output.echo_off
+    output.enable_alternate_screen  if options[:full] || options[:alternate_screen]
+    output.enable_mouse             if options[:full] || options[:mouse]
+    output.hide_cursor              if options[:full] || options[:no_cursor]
+    output.enable_focus_events
+    output.enable_resize_events
+    output.clear
+
+    yield self
+  ensure
+    output.reset_all
+    output.disable_alternate_screen if options[:full] || options[:alternate_screen]
+  end
+
+  def alternate_screen
+    yield
+  ensure
+    out "\e[?47l"
+  end
+
+  # execute passed in block with the cursor hidden, then re-show it
+  def without_cursor
+    hide_cursor
+    yield self
+  ensure
+    show_cursor
+  end
+
 end
 end

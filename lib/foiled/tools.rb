@@ -93,6 +93,16 @@ module Tools
   end
 
 
+  # r, g, b are in 0..1
+  def rgb_screen_color(r, g, b)
+    16 + (r*5.9).to_i * 36 + (g*5.9).to_i * 6 + (b*5.9).to_i
+  end
+
+  # g is in 0..1
+  def gray_screen_color(g)
+    232 + (g*23).to_i
+  end
+
   def window(*args); Foiled::Window.new *args end
   def buffer(*args); Foiled::Buffer.new *args end
 end

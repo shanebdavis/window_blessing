@@ -21,20 +21,9 @@ class WindowUI < XtermScreen
     end
   end
 
-  def quit
-    @running = false
-  end
-
-  # run xterm raw-session
-  def start(with_mouse=false, &block)
-    output.without_cursor do
-      super
-    end
-  end
-
   def update_from_screen_buffer
     if dirty_buffer = screen_buffer.dirty_subbuffer
-      XtermLog.log "#{self.class}#update_from_screen_buffer() diry_area: #{screen_buffer.dirty_area}"
+#      XtermLog.log "#{self.class}#update_from_screen_buffer() diry_area: #{screen_buffer.dirty_area}"
       output.draw_buffer screen_buffer.dirty_area.loc, dirty_buffer
       screen_buffer.clean
     end

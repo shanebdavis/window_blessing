@@ -30,7 +30,6 @@ class Window
     return if a==@area
     request_redraw
 
-    puts "#{self.class} a=#{a} @area=#{@area}"
     old_size = @area.size
     @area = a
 

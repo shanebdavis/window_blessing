@@ -2,8 +2,74 @@
 # ref: http://www.vt100.net/docs/vt102-ug/chapter5.html
 
 module Foiled
+
 class XtermOutput
-  include Color
+  module SetColor
+    def set_color(fg, bg=nil)
+      out "\x1b[38;5;#{fg}m" if fg
+      out "\x1b[48;5;#{bg}m" if bg
+    end
+
+    def reset_color
+      out "\x1b[0m"
+    end
+
+    def out_color(txt, fg, bg)
+      set_color(fg, bg)
+      out txt
+      reset_color
+    end
+  end
+  include SetColor
+
+  module SetState
+    def show_cursor; out "\e[?25h"; end
+    def hide_cursor; out "\e[?25l"; end
+
+    def enable_mouse; out "\e[?1003h"; end
+    def disable_mouse; out "\e[?1003l"; end
+
+    def enable_focus_events; out "\e[?1004h" end
+    def disable_focus_events; out "\e[?1004l" end
+
+    def enable_alternate_screen
+      out "\e7"
+      out "\e[?47h"
+    end
+
+    def disable_alternate_screen
+      out "\e[?47l"
+      out "\e8"
+    end
+
+    # TODO: find out what stty raw -echo sends to xterm
+    # INTERNAL NOTE: out "\e[12h" # should turn off echo according to doc, but didn't work
+    # http://stackoverflow.com/questions/174933/how-to-get-a-single-character-without-pressing-enter
+    def echo_off; system "stty raw -echo"; end
+
+    # INTERNAL NOTE: out "\e[12l" # should turn echo back on
+    def echo_on; system "stty -raw echo"; end
+
+=begin
+raw may set the following:
+00830         option(x + "-icrnl", ""); /* map CR to NL on input */
+00831         option(x + "-ixon", "");  /* enable start/stop output control */
+00832         option(x + "-opost", ""); /* perform output processing */
+00833         option(x + "-onlcr", ""); /* Map NL to CR-NL on output */
+00834         option(x + "-isig", "");  /* enable signals */
+00835         option(x + "-icanon", "");/* canonical input (erase and kill enabled) */
+00836         option(x + "-iexten", "");/* enable extended functions */
+00837         option(x + "-echo", "");  /* enable echoing of input characters */
+
+=end
+
+    # This seems to work - or at least it does SOMETHING
+    # def insert_mode; out "\e[4m"; end
+    # def replace_mode; out "\e[4l"; end
+
+  end
+  include SetState
+
   attr_accessor :xterm_state
 
   def initialize(xterm_state)
@@ -29,10 +95,8 @@ class XtermOutput
   end
 
   def out_at_with_color(loc, str, fg, bg)
-    XtermLog.log "out_at_with_color input = "+ [str, fg, bg].inspect + " zip=" + str.chars.zip(fg,bg).inspect
     cursor loc
     str.chars.zip(fg,bg).each do |c,f,b|
-#      XtermLog.log "out_at_with_color #{[c,f,b].inspect}"
       set_color f, b
       out c
     end
@@ -46,9 +110,6 @@ class XtermOutput
     end
   end
 
-  def show_cursor; out "\e[?25h"; end
-  def hide_cursor; out "\e[?25l"; end
-
   # convert all \n to \n\r
   def puts(s=nil)
     width = xterm_state.size.x
@@ -60,10 +121,6 @@ class XtermOutput
 
   def clear; out "\e[2J"; end
 
-  def enable_mouse; out "\e[?1003h"; end
-  def disable_mouse; out "\e[?1003l"; end
-  def enable_focus_events; out "\e[?1004h" end
-  def disable_focus_events; out "\e[?1004l" end
 
   # INTERNAL NOTE: xterm returns 3 numbers: ?, height, width
   # Xterm sends back response as an escape sequence. EventParser knows how to capture and interpret the result.
@@ -98,57 +155,5 @@ class XtermOutput
     show_cursor
     echo_on
   end
-
-  def enter_alternate_screen
-    out "\e7"
-    out "\e[?47h"
-  end
-
-  def exit_alternate_screen
-    out "\e[?47l"
-    out "\e8"
-  end
-
-  def clean_screen(with_mouse=false)
-    echo_off
-    enter_alternate_screen
-    enable_mouse if with_mouse
-    enable_focus_events
-    enable_resize_events
-    clear
-
-    yield self
-  ensure
-    reset_all
-    exit_alternate_screen
-    $stdout.puts "#{self.class}::clean_screen: Done."
-  end
-
-  def alternate_screen
-    yield
-  ensure
-    out "\e[?47l"
-  end
-
-  # execute passed in block with the cursor hidden, then re-show it
-  def without_cursor
-    hide_cursor
-    yield self
-  ensure
-    show_cursor
-  end
-
-  # TODO: find out what stty raw -echo sends to xterm
-  # INTERNAL NOTE: out "\e[12h" # should turn off echo according to doc, but didn't work
-  # http://stackoverflow.com/questions/174933/how-to-get-a-single-character-without-pressing-enter
-  def echo_off; system "stty raw -echo"; end
-
-  # INTERNAL NOTE: out "\e[12l" # should turn echo back on
-  def echo_on; system "stty -raw echo"; end
-
-  # This seems to work - or at least it does SOMETHING
-  # def insert_mode; out "\e[4m"; end
-  # def replace_mode; out "\e[4l"; end
-
 end
 end

@@ -2,7 +2,7 @@
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 include GuiGeo
 
-Foiled::XtermScreen.new.start(true) do |screen|
+Foiled::XtermScreen.new.start(:full=>true) do |screen|
   event_manager = screen.event_manager
 
   last_event = nil

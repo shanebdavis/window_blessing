@@ -1,22 +1,39 @@
 #!/usr/bin/env ruby
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 include GuiGeo
+include Foiled::Tools
 
-Foiled::WindowUI.new.start(true) do |win|
-  include Foiled::Color
-  r = rect 10, 10, 6, 3
-
-  s = point 12,6
-  colorful = Foiled::Buffer.new s
-  s.y.times do |y|
-    s.x.times do |x|
-      c = rgb_to_screen_color y / (s.y-1).to_f, x / (s.x-1).to_f, 0
-      colorful.draw_rect rect(point(x,y),point(1,1)), :bg => c
+def colorful_buffer(size)
+  Foiled::Buffer.new(size).tap do |buffer|
+    size.y.times do |y|
+      size.x.times do |x|
+        c = rgb_screen_color y / (size.y-1).to_f, x / (size.x-1).to_f, 0
+        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => c
+      end
     end
   end
-  win.screen_buffer.draw_buffer r.loc, colorful
+end
 
-  r.size = colorful.size
+def gray_buffer(size)
+  Foiled::Buffer.new(size).tap do |buffer|
+    size.y.times do |y|
+      size.x.times do |x|
+        g1 = gray_screen_color(x / (size.x-1).to_f)
+        g2 = gray_screen_color(y / (size.y-1).to_f)
+        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => g1, :fg => g2, :string => "o"
+      end
+    end
+  end
+end
+
+Foiled::WindowUI.new.start(:full=>true) do |win|
+  r = rect 10, 10, 6, 3
+
+  demo_buffer = gray_buffer(point 23,12)
+  demo_buffer = colorful_buffer(point 12,6)
+  win.screen_buffer.draw_buffer r.loc, demo_buffer
+
+  r.size = demo_buffer.size
   old_r = r.clone
 
   win.event_manager.add_handler :tick do |event|
@@ -24,7 +41,7 @@ Foiled::WindowUI.new.start(true) do |win|
       r = rect(win.state.size).bound(r)
       if r != old_r
         win.screen_buffer.draw_rect old_r, :string => " "
-        win.screen_buffer.draw_buffer r.loc, colorful
+        win.screen_buffer.draw_buffer r.loc, demo_buffer
         old_r = r.clone
       end
     end
