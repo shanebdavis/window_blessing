@@ -53,7 +53,7 @@ class XtermScreen
   # options
   #
   def start(options={})
-    clean_screen(options) do
+    in_xterm_state(options) do
       initialize_screen
       yield self
       event_loop
@@ -66,7 +66,7 @@ class XtermScreen
   #   :no_cursor => true
   #   :alternate_screen => true
   #   :full => true (enables all features)
-  def clean_screen(options = {})
+  def in_xterm_state(options = {})
     output.echo_off
     output.enable_alternate_screen  if options[:full] || options[:alternate_screen]
     output.enable_mouse             if options[:full] || options[:mouse]
@@ -79,20 +79,6 @@ class XtermScreen
   ensure
     output.reset_all
     output.disable_alternate_screen if options[:full] || options[:alternate_screen]
-  end
-
-  def alternate_screen
-    yield
-  ensure
-    out "\e[?47l"
-  end
-
-  # execute passed in block with the cursor hidden, then re-show it
-  def without_cursor
-    hide_cursor
-    yield self
-  ensure
-    show_cursor
   end
 
 end
