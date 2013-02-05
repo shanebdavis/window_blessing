@@ -97,6 +97,7 @@ class XtermOutput
     enable_mouse if with_mouse
     enable_focus_events
     enable_resize_events
+    clear
 
     yield self
   ensure

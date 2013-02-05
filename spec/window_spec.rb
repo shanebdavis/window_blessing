@@ -26,7 +26,7 @@ describe "Window" do
     w.background = "frank"
     w.buffer.to_s.should == "    \n    \n    \n    "
     w.draw
-    w.buffer.to_s.should == "fran\nfran\nfran\nfran"
+    w.buffer.to_s.should == "fran\nkfra\nnkfr\nankf"
   end
 
   it 'add_child' do

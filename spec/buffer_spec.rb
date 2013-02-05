@@ -5,7 +5,7 @@ describe "Buffer" do
   include Tools
 
   def test_frame
-    buffer(point(4,4), %w{1234 2345 3456 4567})
+    buffer(point(4,4), :contents => %w{1234 2345 3456 4567})
   end
 
   it "blank fb" do
@@ -13,7 +13,8 @@ describe "Buffer" do
   end
 
   it "string init" do
-    buffer(point(4,4),"hi\nthere").to_s.should == "hi  \nther\n    \n    "
+    buffer(point(4,4),:contents => ["hi","there"]).to_s.should == "hi  \nther\n    \n    "
+    buffer(point(4,4),:contents => "hi\nthere").to_s.should == "hi  \nther\n    \n    "
   end
 
   it "inspect" do
@@ -21,7 +22,7 @@ describe "Buffer" do
   end
 
   it "invalid init" do
-    expect { buffer(point(4,4),{}) }.to raise_error
+    expect { buffer(point(4,4),:contents => 1) }.to raise_error
   end
 
   it "subbuffer" do
@@ -41,24 +42,24 @@ describe "Buffer" do
 
   it "fill" do
     fb = buffer(point(4,4))
-    fb.fill "-"
+    fb.fill :string => "-"
     fb.to_s.should == "----\n----\n----\n----"
   end
 
   it "cropped fill" do
     (f=test_frame).crop(rect(1,1,2,1)) do
-      f.fill '-'
+      f.fill :string => '-'
     end.to_s.should == "1234\n2--5\n3456\n4567"
   end
 
   it "draw_rect" do
     (f=buffer(point(4,4))).to_s.should == "    \n    \n    \n    "
-    f.draw_rect(rect(1,0,2,2),"-")
+    f.draw_rect(rect(1,0,2,2),:string => "-")
     f.to_s.should == " -- \n -- \n    \n    "
   end
 
   it "clear" do
-    fb = buffer(point 2,2).fill('-')
+    fb = buffer(point 2,2).fill(:string => '-')
     fb.to_s.should == "--\n--"
     fb.clear
     fb.to_s.should == "  \n  "
@@ -66,13 +67,14 @@ describe "Buffer" do
 
   it "draw_buffer" do
     f1 = test_frame
-    f2 = buffer(point(2,2),"ab\nbc")
+    f2 = buffer(point(2,2), :contents => "ab\nbc")
     f1.draw_buffer(point(1,1),f2)
     f1.to_s.should == "1234\n2ab5\n3bc6\n4567"
   end
+
   it "cropped draw_buffer" do
     f1 = test_frame
-    f2 = buffer(point(2,2),"ab\nbc")
+    f2 = buffer(point(2,2), :contents => "ab\nbc")
     f1.crop(rect(1,1,2,1)) do
       f1.draw_buffer(point(1,1),f2)
     end.to_s.should == "1234\n2ab5\n3456\n4567"
@@ -103,6 +105,13 @@ describe "Buffer" do
     is_now_dirty.should == false
     f1.dirty
     is_now_dirty.should == true
+  end
+
+  it "color buffers" do
+    f1 = test_frame
+
+    f1.fg_buffer.should == [[7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7]]
+    f1.bg_buffer.should == [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
   end
 end
 end

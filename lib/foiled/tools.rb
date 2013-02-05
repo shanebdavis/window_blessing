@@ -39,16 +39,17 @@ module Tools
     end
   end
 
-  def resize2d(buffer, size, blank_element)
+  def resize2d(array2d, size, blank_element)
+    array2d ||= []
     blank_element = [blank_element] unless blank_element.kind_of?(String)
 
-    if buffer.length != size.y
-      buffer = buffer[0..(size.y-1)]
+    if array2d.length != size.y
+      array2d = array2d[0..(size.y-1)]
       blank_line = blank_element * size.x
-      buffer << blank_line.clone while buffer.length < size.y
+      array2d += (size.y - array2d.length).times.collect {blank_line.clone}
     end
 
-    buffer.collect do |line|
+    array2d.collect do |line|
       if line.length!=size.x
         line = line[0..(size.x-1)]
         line + blank_element * (size.x - line.length)
@@ -58,11 +59,39 @@ module Tools
     end
   end
 
+
+  def subarray2d(array2d, area)
+    size = point(array2d[0].length,array2d.length)
+    area = area | rect(size)
+    x_range = area.x_range
+    array2d[area.y_range].collect do |line|
+      line[x_range]
+    end
+  end
+
   def fill_line(fill, length)
     line = fill * (length/fill.length)
     line = (line+fill)[0..length-1] if line.length != length
     line
   end
+
+  def gen_array2d(size, fill)
+    fill = case fill
+    when String, Array then fill
+    else [fill]
+    end
+
+    a = (size.x * size.y)
+    full = fill * ((a / fill.length) + 1)
+
+    if fill.kind_of?(String)
+      full.scan /.{#{size.x}}/
+    else
+      full.each_slice(size.x).collect {|a|a}
+    end[0..size.y-1]
+
+  end
+
 
   def window(*args); Foiled::Window.new *args end
   def buffer(*args); Foiled::Buffer.new *args end

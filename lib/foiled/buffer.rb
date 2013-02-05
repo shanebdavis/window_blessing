@@ -10,46 +10,58 @@ module Foiled
 class Buffer
   include Tools
 
-  attr_accessor :size
+  attr_reader :size
   attr_accessor :contents
-  attr_accessor :crop_area
-  attr_reader :dirty_area
+
+  # used as the default color when resizing
+  attr_accessor :bg, :fg
 
   # color buffers. 2D arrays. Each element is a number, 0-255.
   attr_accessor :fg_buffer, :bg_buffer
 
+  attr_accessor :crop_area
+  attr_reader :dirty_area
+
   def Buffer.default_bg; 0; end
   def Buffer.default_fg; 7; end
 
-  def initialize(size, init=nil, bg_color = Buffer.default_bg, fg_color = Buffer.default_fg)
-    @contents = case init
-    when String then init.gsub("\t"," "*tab_size).split("\n")
-    when Array then init
-    when nil then []
-    else raise ArgumentError.new "invalid initailizer: #{init.inspect}"
-    end
-    @size = point
-    @fg_buffer = []
-    @bg_buffer = []
-    self.size = size
+  # init-options
+  #   :bg_bufer => 2D array of 0-255 values
+  #   :fg_bufer => 2D array of 0-255 values
+  #   :contents => array of strings or string with new-lines
+  # fill options (will override init-options)
+  #   :string, :bg, :fg -- see #fill
+  def initialize(size, options={})
+    @size = size
+
+    @contents  = options[:contents]
+    @fg_buffer = options[:fg_buffer]
+    @bg_buffer = options[:bg_buffer]
+
+    @contents = @contents.split("\n") if @contents.kind_of?(String)
+
+    fill options
+    normalize
+    clean
   end
 
-  def size=(new_size)
-    return unless size != new_size
-    @size = new_size
-    @crop_area = rect new_size
-    @contents = resize2d @contents, size, " "
-    @fg_buffer = resize2d @bg_buffer, size, Buffer.default_bg
-    @bg_buffer = resize2d @bg_buffer, size, Buffer.default_fg
+  def normalize
+    @contents  = resize2d @contents , size, " "
+    @fg_buffer = resize2d @fg_buffer, size, Buffer.default_fg
+    @bg_buffer = resize2d @bg_buffer, size, Buffer.default_bg
   end
 
   def on_dirty(&block)
     @on_dirty = block
   end
 
+  def crop_area
+    @crop_area || rect(size)
+  end
+
   def crop(area)
     old_crop_area = @crop_area
-    @crop_area = area | (old_crop_area || area)
+    @crop_area = area | crop_area
     yield
     self
   ensure
@@ -82,9 +94,12 @@ class Buffer
 
     x_range = area.x_range
 
-    buffer area.size, (contents[area.y_range].collect do |line|
-      line[x_range]
-    end)
+    buffer area.size,
+      :contents  => subarray2d(contents,area),
+      :fg_buffer => subarray2d(fg_buffer,area),
+      :bg_buffer => subarray2d(bg_buffer,area),
+      :fg => fg,
+      :bg => bg
   end
 
   def dirty_subbuffer
@@ -92,13 +107,8 @@ class Buffer
   end
 
   #########
-  # DRAWING
+  # dirty?
   #########
-
-  def clear
-    fill ' '
-  end
-
   def dirty?
     !!@dirty_area
   end
@@ -113,20 +123,43 @@ class Buffer
     @dirty_area
   end
 
-  def fill(str)
-    if cropped?
-      draw_rect(crop_area,str)
-    else
-      dirty internal_area
-      line = fill_line(str, size.x)
-      @contents = size.y.times.collect {line.clone}
-      self
-    end
+  #########
+  # DRAWING
+  #########
+
+  def clear
+    @contents = @bg_buffer = @fg_buffer = nil
+    normalize
+    self
   end
 
-  def draw_rect(rectangle, fill_string)
-    rectangle = rectangle | crop_area if crop_area
-    draw_buffer rectangle.loc, buffer(rectangle.size).fill(fill_string)
+  # options
+  #  :bg => background color OR 1d array of bg-color pattern - nil => don't touch bg
+  #  :fg => foreground color OR 1d array of fg-color pattern - nil => don't touch fb
+  #  :string => string - length 1 or more, use to fill-init @contents - nil => don't touch @contents
+  def fill(options = {})
+    if cropped?
+      c = crop_area
+      draw_buffer c.loc, buffer(c.size, options)
+    else
+      dirty internal_area
+
+      string = options[:string]
+      fg = options[:fg]
+      bg = options[:bg]
+
+      @contents  = gen_array2d(size,string) if string
+      @fg_buffer = gen_array2d(size,fg)     if fg
+      @bg_buffer = gen_array2d(size,bg)     if bg
+    end
+    self
+  end
+
+  # options - see #fill options
+  def draw_rect(rectangle, options={})
+    rectangle = rectangle | crop_area
+    draw_buffer rectangle.loc, buffer(rectangle.size, options)
+    self
   end
 
   def draw_buffer(loc, buffer, source_area = nil)
@@ -139,7 +172,9 @@ class Buffer
     end
 
     dirty rect(loc, buffer.size)
-    @contents = overlay2d(loc, buffer.contents, contents)
+    @contents  = overlay2d(loc, buffer.contents, contents)
+    @fg_buffer = overlay2d(loc, buffer.fg_buffer, fg_buffer)
+    @bg_buffer = overlay2d(loc, buffer.bg_buffer, bg_buffer)
     self
   end
 

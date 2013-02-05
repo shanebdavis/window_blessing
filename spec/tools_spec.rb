@@ -105,6 +105,38 @@ describe "Tools" do
     r = [[1],[2,2],[3,3,3]]
     r = resize2d(r,point(3,4),4)
     r.should == [[1, 4, 4], [2, 2, 4], [3, 3, 3], [4, 4, 4]]
-    end
+  end
+
+  it "subarray2d string" do
+    r = ["123", "456", "789"]
+    subarray2d(r,rect(1,1,2,2)).should == ["56", "89"]
+    subarray2d(r,rect(1,2,2,2)).should == ["89"]
+    subarray2d(r,rect(2,1,2,2)).should == ["6", "9"]
+
+    subarray2d(r,rect(-1,1,2,2)).should == ["4", "7"]
+    subarray2d(r,rect(1,-1,2,2)).should == ["23"]
+  end
+
+  it "subarray2d array" do
+    r = [[1,2,3], [4,5,6], [7,8,9]]
+    subarray2d(r,rect(1,1,2,2)).should == [[5,6], [8,9]]
+    subarray2d(r,rect(1,2,2,2)).should == [[8,9]]
+    subarray2d(r,rect(2,1,2,2)).should == [[6], [9]]
+
+    subarray2d(r,rect(-1,1,2,2)).should == [[4], [7]]
+    subarray2d(r,rect(1,-1,2,2)).should == [[2,3]]
+  end
+
+  it "gen_array2d string" do
+    gen_array2d(point(1,1), "-=").should == ["-"]
+    gen_array2d(point(3,3), "-=").should == ["-=-", "=-=", "-=-"]
+    gen_array2d(point(4,4), "123").should == ["1231", "2312", "3123", "1231"]
+  end
+
+  it "gen_array2d array" do
+    gen_array2d(point(1,1), [1, 2]).should == [[1]]
+    gen_array2d(point(3,3), [1, 2]).should == [[1,2,1], [2,1,2], [1,2,1]]
+    gen_array2d(point(4,4), [1, 2, 3]).should == [[1, 2, 3, 1], [2, 3, 1, 2], [3, 1, 2, 3], [1,2,3,1]]
+  end
 end
 end

@@ -21,7 +21,10 @@ class EventManager
     @event_handlers = {}
     clear_events
     add_handler(:unhandled_event){}
-    add_handler(:event_exception){}
+    add_handler(:event_exception) do |e|
+      XtermLog.log "#{self.class}: event_exception: #{e[:exception].inspect}"
+      XtermLog.log "  "+ e[:exception].backtrace.join("\n  ")
+    end
     add_handler(:all){}
   end
 

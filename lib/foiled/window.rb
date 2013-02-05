@@ -26,18 +26,21 @@ class Window
 
   def loc; area.loc; end
 
-  def redraw_if_expanded(old_size, new_size)
-    request_internal_redraw unless new_size <= old_size
-  end
-
   def area=(a)
     return if a==@area
     request_redraw
+
+    puts "#{self.class} a=#{a} @area=#{@area}"
     old_size = @area.size
-    @buffer.size = a.size
     @area = a
-    redraw_if_expanded old_size, a.size
-    request_redraw
+
+    if a.size <= old_size
+      @buffer = @buffer.subbuffer(reaa.size)
+      request_redraw
+    else
+      @buffer = Buffer.new area.size
+      request_internal_redraw
+    end
   end
 
   def internal_area
@@ -109,7 +112,7 @@ class Window
 
     b = buffer
     b.crop(internal_area) do
-      b.fill background || ' '
+      b.fill :string => background || ' '
       children.each do |child|
         child.draw b, (b.crop_area - child.loc)
       end
