@@ -14,14 +14,13 @@ class Window
 
   public
   def initialize(area=rect(0,0,20,20))
-    raise "rectangle area required" unless area.kind_of? GuiGeo::Rectangle
-    raise "size must be at least 1x1" unless area.size > point
-    XtermLog.log "new window area = #{area.inspect}"
-    @area = area
+    @area = rect
+    self.area = area
     @bg = Buffer.default_bg
     @fg = Buffer.default_fg
     @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
     @children = []
+    @requested_redraw_area = nil
   end
 
   def fill(options={})
@@ -66,14 +65,16 @@ class Window
     end
   end
 
-  def area=(a)
-    return if a==@area
+  def area=(area)
+    raise "rectangle area required" unless area.kind_of? GuiGeo::Rectangle
+    raise "size must be at least 1x1" unless area.size > point
+    return if area==@area
     request_redraw
 
     old_size = @area.size
-    @area = a
+    @area = area
 
-    if a.size != old_size
+    if area.size != old_size
       size_changed(old_size)
     else
       request_redraw
@@ -98,7 +99,7 @@ class Window
   # you should never set the parent directly
   def parent=(p) @parent = p; end
 
-  def mouse_event(event)
+  def pointer_event(event)
     event[:loc] -= area.loc
     XtermLog.log "event=#{event}"
     @mouse_focused || children.reverse_each do |child|
@@ -107,7 +108,7 @@ class Window
         break
       end
     end
-    @mouse_focused.mouse_event event if @mouse_focused
+    @mouse_focused.pointer_event event if @mouse_focused
     @mouse_focused = nil if event[:button] == :button_up
   end
 
@@ -158,6 +159,13 @@ class Window
     parent && parent.request_internal_redraw(area)
   end
 
+  def draw_internal
+    buffer.fill :string => ' ', :bg => bg
+    children.each do |child|
+      child.draw buffer, (buffer.crop_area - child.loc)
+    end
+  end
+
   # redraw self if there was a recent call to request_redraw
   # draw to target_buffer if set
   # returns the internal_area that was updated
@@ -168,13 +176,7 @@ class Window
     return if internal_area.size <= point
 
     if @requested_redraw_area
-      b = buffer
-      b.crop(internal_area) do
-        b.fill :string => ' ', :bg => bg
-        children.each do |child|
-          child.draw b, (b.crop_area - child.loc)
-        end
-      end
+      buffer.crop(internal_area) {draw_internal}
       @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)
     end
 

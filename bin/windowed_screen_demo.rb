@@ -1,14 +1,16 @@
 #!/usr/bin/env ruby
+# encoding: UTF-8
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 include GuiGeo
-include Foiled::Tools
+include Foiled
+include Tools
 
-class DragWindow < Foiled::Window
+class DragWindow < Window
   def initialize(rect)
     super rect
   end
 
-  def mouse_event(event)
+  def pointer_event(event)
     case event[:button]
     when :button1_down then
       @mouse_offset = event[:loc] - loc
@@ -18,7 +20,7 @@ class DragWindow < Foiled::Window
   end
 end
 
-class InstructionsWindow < Foiled::Window
+class InstructionsWindow < Window
   def initialize
     super rect(point,point(1000,1))
     self.bg = gray_screen_color(0.2)
@@ -30,7 +32,7 @@ end
 
 def color_window(r)
   size = r.size
-  b = Foiled::Buffer.new(size).tap do |buffer|
+  b = Buffer.new(size).tap do |buffer|
     size.y.times do |y|
       size.x.times do |x|
         c1 = rgb_screen_color y / (size.y-1).to_f, x / (size.x-1).to_f, 0
@@ -39,6 +41,7 @@ def color_window(r)
       end
     end
   end
+  b.fill :string => "▒"
   w = DragWindow.new r
   w.buffer.draw_buffer point, b
   w
@@ -46,43 +49,44 @@ end
 
 def gray_window(r)
   size = r.size
-  b = Foiled::Buffer.new(size).tap do |buffer|
+  b = Buffer.new(size).tap do |buffer|
     size.y.times do |y|
       size.x.times do |x|
         g1 = gray_screen_color(x / (size.x-1).to_f)
         g2 = gray_screen_color(y / (size.y-1).to_f)
-        str = (255-32).times.collect do |a|
-          a += 32
-          "%c"%a
-        end.join
-        str = "abc"
-        #str.force_encoding "binary"
-        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => g1, :fg => g2, :string => str
+        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => g1, :fg => g2, :string => "o"
       end
     end
   end
+  #b.fill :string => "*"
+  #"⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ "
+  #http://www.csbruce.com/software/utf-8.html
+  #"╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ ╈ ╉ ╊ ╋ "
+  #"═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬"
+  #"◠ ◡ ◦ ◧ ◨ ◩ ◪ ◫ ◬ ◭ ◮ "
+  #"◰ ◱ ◲ ◳ ◴ ◵ ◶ ◷ ◸ ◹ ◺ ◿ "
+  #"╬"
+  # "▀▁▂▃▄▅▆▇█"
+  # "▉▊▋▌▍▎▏▐"
+  # "░▒▓"
+  # "▔▕▖▗▘▙▚▛▜▝▞▟"
+  # "▸▾"
   w = DragWindow.new r
   w.buffer.draw_buffer point, b
   w
 end
 
-Foiled::WindowedScreen.new.start(:full=>true) do |screen|
-  r = rect 10, 10, 6, 3
+WindowedScreen.new.start(:full=>true, :utf8 => true) do |screen|
 
   root_window = screen.root_window
 
-  gray_win = gray_window(rect(10,10,23,12))
-  color_win = color_window(rect(30,15,12,6))
-
-  #gray_win.bg = rgb_screen_color(0.5,0.5,0.5)
-  #color_win.bg = rgb_screen_color(0.0,0.0,1.0)
-
-  root_window.add_child gray_win
-  root_window.add_child color_win
+  root_window.add_child gray_win = gray_window(rect(10,10,23,12))
+  root_window.add_child color_win = color_window(rect(30,15,24,12))
   root_window.add_child InstructionsWindow.new
 
+
   screen.event_manager.add_handler :key_press do |event|
-    Foiled::XtermLog.log "key_press: #{event[:key]}"
+    XtermLog.log "key_press: #{event[:key]}"
     r = color_win.area.clone
     case event[:key]
     when :home      then r.loc.x = 0

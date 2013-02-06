@@ -32,6 +32,9 @@ class XtermOutput
     def enable_focus_events; out "\e[?1004h" end
     def disable_focus_events; out "\e[?1004l" end
 
+    def enable_utf8; out "\e%G" end
+    def disable_utf8; out "\e%@" end
+
     def enable_alternate_screen
       out "\e7"
       out "\e[?47h"

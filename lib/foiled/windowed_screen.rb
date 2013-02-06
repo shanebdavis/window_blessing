@@ -19,10 +19,11 @@ class WindowedScreen < XtermScreen
 
     event_manager.add_handler :resize do |event|
       root_window.size = event[:size]
+      root_window.request_internal_redraw
     end
 
     event_manager.add_handler :mouse do |event|
-      root_window.mouse_event event.clone
+      root_window.pointer_event event.clone
     end
   end
 

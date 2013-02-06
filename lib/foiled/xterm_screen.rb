@@ -65,12 +65,14 @@ class XtermScreen
   #   :mouse => true
   #   :no_cursor => true
   #   :alternate_screen => true
-  #   :full => true (enables all features)
+  #   :full => true (enables all above features)
+  #   :utf8
   def in_xterm_state(options = {})
     output.echo_off
     output.enable_alternate_screen  if options[:full] || options[:alternate_screen]
     output.enable_mouse             if options[:full] || options[:mouse]
     output.hide_cursor              if options[:full] || options[:no_cursor]
+    output.enable_utf8              if options[:utf8]
     output.enable_focus_events
     output.enable_resize_events
     output.clear
@@ -78,6 +80,7 @@ class XtermScreen
     yield self
   ensure
     output.reset_all
+    output.disable_utf8             if options[:utf8]
     output.disable_alternate_screen if options[:full] || options[:alternate_screen]
   end
 

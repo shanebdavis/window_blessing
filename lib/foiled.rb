@@ -1,9 +1,16 @@
+def add_load_path(path)
+  full_path = File.expand_path path
+  $LOAD_PATH.unshift full_path unless $LOAD_PATH.include?(path) || $LOAD_PATH.include?(full_path)
+end
+add_load_path File.dirname(__FILE__)
+
 =begin
 Copyright 2013 Shane Brinkman-Davis
 See README for licence information.
 =end
 
 %w{
+  constants
   tools
   buffer
   version
@@ -17,8 +24,9 @@ See README for licence information.
   buffered_screen
   window
   windowed_screen
+  widgets/slider
 }.each do |file|
-  require File.join(File.dirname(__FILE__),"foiled",file)
+  require "foiled/#{file}"
 end
 
 module Foiled
