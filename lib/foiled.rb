@@ -16,7 +16,7 @@ See README for licence information.
   xterm_screen
   buffered_screen
   window
-  window_ui
+  windowed_screen
 }.each do |file|
   require File.join(File.dirname(__FILE__),"foiled",file)
 end

@@ -7,17 +7,29 @@ class Window
   # you should never set the parent directly
   attr_accessor :parent
   attr_accessor :area
-  attr_accessor :background
+  attr_accessor :bg
 
   private
   attr_reader :children
 
   public
   def initialize(area=rect(0,0,20,20))
+    raise "rectangle area required" unless area.kind_of? GuiGeo::Rectangle
+    raise "size must be at least 1x1" unless area.size > point
+    XtermLog.log "new window area = #{area.inspect}"
     @area = area
-    @buffer = Buffer.new area.size
+    @bg = Buffer.default_bg
+    @buffer = Buffer.new area.size, :bg => @bg
     @children = []
+  end
+
+  def bg=(bg)
+    @bg = bg
     request_internal_redraw
+  end
+
+  def redraw_requested?
+    !!requested_redraw_area
   end
 
   def inspect
@@ -26,6 +38,16 @@ class Window
 
   def loc; area.loc; end
 
+  def size_changed(old_size)
+    if area.size <= old_size
+      @buffer = @buffer.subbuffer(rect(area.size))
+      request_redraw
+    else
+      @buffer = Buffer.new area.size
+      request_internal_redraw
+    end
+  end
+
   def area=(a)
     return if a==@area
     request_redraw
@@ -33,13 +55,22 @@ class Window
     old_size = @area.size
     @area = a
 
-    if a.size <= old_size
-      @buffer = @buffer.subbuffer(reaa.size)
-      request_redraw
+    if a.size != old_size
+      size_changed(old_size)
     else
-      @buffer = Buffer.new area.size
-      request_internal_redraw
+      request_redraw
     end
+  end
+
+  def loc; area.loc; end
+  def size; area.size; end
+  def size=(new_size) self.area = rect area.loc, new_size end
+  def loc=(new_loc) self.area = rect new_loc, area.size end
+
+  def move_onscreen
+    return unless parent
+    parent_area = rect(point, parent.area.size)
+    self.area = parent_area.bound(area)
   end
 
   def internal_area
@@ -53,6 +84,19 @@ class Window
 
   # you should never set the parent directly
   def parent=(p) @parent = p; end
+
+  def mouse_event(event)
+    event[:loc] -= area.loc
+    XtermLog.log "event=#{event}"
+    @mouse_focused || children.reverse_each do |child|
+      if child.area.contains? event[:loc]
+        @mouse_focused=child
+        break
+      end
+    end
+    @mouse_focused.mouse_event event if @mouse_focused
+    @mouse_focused = nil if event[:button] == :button_up
+  end
 
   ################################
   # Children
@@ -108,15 +152,18 @@ class Window
     internal_area ||= @requested_redraw_area
     return unless internal_area
     internal_area = internal_area | self.internal_area
+    return if internal_area.size <= point
 
-    b = buffer
-    b.crop(internal_area) do
-      b.fill :string => background || ' '
-      children.each do |child|
-        child.draw b, (b.crop_area - child.loc)
+    if @requested_redraw_area
+      b = buffer
+      b.crop(internal_area) do
+        b.fill :string => ' ', :bg => bg
+        children.each do |child|
+          child.draw b, (b.crop_area - child.loc)
+        end
       end
+      @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)
     end
-    @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)
 
     target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer
 

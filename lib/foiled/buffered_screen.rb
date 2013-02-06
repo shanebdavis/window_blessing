@@ -12,7 +12,6 @@ class BufferedScreen < XtermScreen
     end
 
     event_manager.add_handler :resize do |event|
-      XtermLog.log "resize #{event.inspect}"
       @screen_buffer = Buffer.new event[:size]
       @screen_buffer.dirty
     end

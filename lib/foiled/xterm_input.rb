@@ -10,7 +10,6 @@ class XtermInput
   def read_events
     events = []
     if raw = read_pending_input
-      XtermLog.log "raw_input: #{raw.inspect}"
       parsed = event_parser.parse(raw)
       if parsed
         new_events = parsed.events
