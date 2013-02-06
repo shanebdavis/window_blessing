@@ -22,7 +22,6 @@ class InstructionsWindow < Foiled::Window
   def initialize
     super rect(point,point(1000,1))
     @buffer = Foiled::Buffer.new size, contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
-    Foiled::XtermLog.log "#{self.class} buffer.contents = #{buffer.to_s} @requested_redraw_area=#{@requested_redraw_area}"
   end
 
   def draw(target_buffer=nil, internal_area=nil)
@@ -97,14 +96,7 @@ Foiled::WindowedScreen.new.start(:full=>true) do |screen|
     when :up        then r.loc.y -= 1
     when :down      then r.loc.y += 1
     end
-    Foiled::XtermLog.log "color_win.area = #{r} #{color_win.class}"
     color_win.area = r
     color_win.move_onscreen
   end
-
-#  screen.event_manager.add_handler :mouse do |event|
-#    Foiled::XtermLog.log "mouse: drag #{event[:loc]}"
-#    gray_win.loc = event[:loc] - gray_win.area.size/2
-#    gray_win.move_onscreen
-#  end
 end
