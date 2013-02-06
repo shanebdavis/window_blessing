@@ -7,8 +7,9 @@ def colorful_buffer(size)
   Foiled::Buffer.new(size).tap do |buffer|
     size.y.times do |y|
       size.x.times do |x|
-        c = rgb_screen_color y / (size.y-1).to_f, x / (size.x-1).to_f, 0
-        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => c
+        c1 = rgb_screen_color y / (size.y-1).to_f, x / (size.x-1).to_f, 0
+        c2 = rgb_screen_color 0, 1 - y / (size.y-1).to_f, 1 - x / (size.x-1).to_f
+        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => c1, :fg => c2, :string => "o"
       end
     end
   end
@@ -26,24 +27,41 @@ def gray_buffer(size)
   end
 end
 
-Foiled::WindowUI.new.start(:full=>true) do |win|
+def draw_instructions(win)
+  b = Foiled::Buffer.new point(win.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
+
+  win.screen_buffer.draw_buffer point, b
+end
+
+Foiled::BufferedScreen.new.start(:full=>true) do |win|
   r = rect 10, 10, 6, 3
 
-  demo_buffer = gray_buffer(point 23,12)
-  demo_buffer = colorful_buffer(point 12,6)
+  grayb = gray_buffer(point 23,12)
+  colorb = colorful_buffer(point 12,6)
+
+  demo_buffer = colorb
   win.screen_buffer.draw_buffer r.loc, demo_buffer
+  draw_instructions(win)
 
   r.size = demo_buffer.size
   old_r = r.clone
 
   win.event_manager.add_handler :tick do |event|
     if r != old_r
-      r = rect(win.state.size).bound(r)
+      r = rect(point(0,1), win.state.size-point(0,1)).bound(r)
       if r != old_r
-        win.screen_buffer.draw_rect old_r, :string => " "
+        win.screen_buffer.draw_rect old_r, :string => " ", :bg => 0
         win.screen_buffer.draw_buffer r.loc, demo_buffer
         old_r = r.clone
       end
+    end
+  end
+
+  win.event_manager.add_handler :characters do |event|
+    case event[:raw]
+    when " " then
+      demo_buffer = demo_buffer == grayb ? colorb : grayb
+      r.size = demo_buffer.size
     end
   end
 
@@ -61,8 +79,14 @@ Foiled::WindowUI.new.start(:full=>true) do |win|
     end
   end
 
+  win.event_manager.add_last_handler :resize do |event|
+    Foiled::XtermLog.log "#{__FILE__} resize: #{event.inspect}"
+    draw_instructions win
+    win.screen_buffer.draw_buffer r.loc, demo_buffer
+  end
+
   win.event_manager.add_handler :mouse do |event|
     Foiled::XtermLog.log "mouse: drag #{event[:loc]}"
-    r.loc = event[:loc]
+    r.loc = event[:loc] - demo_buffer.size/2
   end
 end

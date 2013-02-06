@@ -10,17 +10,15 @@ Foiled::XtermScreen.new.start(:full=>true) do |screen|
 
   event_manager.add_handler :tick do
     screen.output.instance_eval do
-      without_cursor do
-        cursor(0,0)
-        puts Time.now
-        puts "size: #{screen.state.size.inspect}"
+      cursor(0,0)
+      puts Time.now
+      puts "size: #{screen.state.size.inspect}"
 
-        if last_event
-          e = last_event.inspect
-          e += "\nfailure_info (raw=#{last_event[:raw].inspect}): #{last_event[:failure_info]}" if last_event[:failure_info]
-          e += "\ntrace:\n  "+last_event[:exception].backtrace.join("\n  ") if last_event[:type]==:event_exception
-          puts "event #{event_count}: #{e}   "
-        end
+      if last_event
+        e = last_event.inspect
+        e += "\nfailure_info (raw=#{last_event[:raw].inspect}): #{last_event[:failure_info]}" if last_event[:failure_info]
+        e += "\ntrace:\n  "+last_event[:exception].backtrace.join("\n  ") if last_event[:type]==:event_exception
+        puts "event #{event_count}: #{e}   "
       end
     end
   end

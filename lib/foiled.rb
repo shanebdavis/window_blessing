@@ -14,6 +14,7 @@ See README for licence information.
   xterm_state
   xterm_input
   xterm_screen
+  buffered_screen
   window
   window_ui
 }.each do |file|

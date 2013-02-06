@@ -33,6 +33,10 @@ class EventManager
     event_handlers[event_type] << block
   end
 
+  def add_last_handler(event_type, &block)
+    event_handlers[event_type] = [block] + (event_handlers[event_type] || [])
+  end
+
   def send_to_each_handler(handlers, event)
     raise "hell" if !handlers && event[:type] == :unhandled_event
     return handle_event :type => :unhandled_event, :event => event.clone unless handlers
