@@ -7,7 +7,7 @@ class Window
   # you should never set the parent directly
   attr_accessor :parent
   attr_accessor :area
-  attr_accessor :bg
+  attr_accessor :bg, :fg
 
   private
   attr_reader :children
@@ -19,12 +19,30 @@ class Window
     XtermLog.log "new window area = #{area.inspect}"
     @area = area
     @bg = Buffer.default_bg
-    @buffer = Buffer.new area.size, :bg => @bg
+    @fg = Buffer.default_fg
+    @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
     @children = []
+  end
+
+  def fill(options={})
+    @requested_redraw_area = nil
+    @buffer.fill options
+    request_redraw
+  end
+
+  def contents=(contents)
+    @requested_redraw_area = nil
+    @buffer = Buffer.new area.size, :bg => @bg, :contents => contents, :fg => @fg
+    request_redraw
   end
 
   def bg=(bg)
     @bg = bg
+    request_internal_redraw
+  end
+
+  def fg=(fg)
+    @fg = fg
     request_internal_redraw
   end
 
@@ -75,11 +93,6 @@ class Window
 
   def internal_area
     rect @area.size
-  end
-
-  def background=(b)
-    @background = b
-    request_internal_redraw
   end
 
   # you should never set the parent directly

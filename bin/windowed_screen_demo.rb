@@ -21,11 +21,9 @@ end
 class InstructionsWindow < Foiled::Window
   def initialize
     super rect(point,point(1000,1))
-    @buffer = Foiled::Buffer.new size, contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
-  end
-
-  def draw(target_buffer=nil, internal_area=nil)
-    super
+    self.bg = gray_screen_color(0.2)
+    self.fg = rgb_screen_color(0.8,0.8,1.0)
+    self.contents = " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit."
   end
 end
 
@@ -53,7 +51,13 @@ def gray_window(r)
       size.x.times do |x|
         g1 = gray_screen_color(x / (size.x-1).to_f)
         g2 = gray_screen_color(y / (size.y-1).to_f)
-        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => g1, :fg => g2, :string => "o"
+        str = (255-32).times.collect do |a|
+          a += 32
+          "%c"%a
+        end.join
+        str = "abc"
+        #str.force_encoding "binary"
+        buffer.draw_rect rect(point(x,y),point(1,1)), :bg => g1, :fg => g2, :string => str
       end
     end
   end
