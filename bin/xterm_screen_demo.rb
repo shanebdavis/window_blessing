@@ -11,6 +11,7 @@ Foiled::XtermScreen.new.start(:full=>true) do |screen|
   event_manager.add_handler :tick do
     screen.output.instance_eval do
       cursor(0,0)
+      reset_color
       puts Time.now
       puts "size: #{screen.state.size.inspect}"
 

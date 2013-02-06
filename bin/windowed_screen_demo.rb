@@ -3,21 +3,11 @@
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
 include GuiGeo
 include Foiled
+include Widgets
 include Tools
 
 class DragWindow < Window
-  def initialize(rect)
-    super rect
-  end
-
-  def pointer_event(event)
-    case event[:button]
-    when :button1_down then
-      @mouse_offset = event[:loc] - loc
-    when :drag then
-      self.loc = event[:loc] - @mouse_offset
-    end
-  end
+  include DraggableBackground
 end
 
 class InstructionsWindow < Window
@@ -80,7 +70,7 @@ WindowedScreen.new.start(:full=>true, :utf8 => true) do |screen|
 
   root_window = screen.root_window
 
-  root_window.add_child gray_win = gray_window(rect(10,10,23,12))
+  root_window.add_child gray_win = gray_window(rect(10,10,25,13))
   root_window.add_child color_win = color_window(rect(30,15,24,12))
   root_window.add_child InstructionsWindow.new
 

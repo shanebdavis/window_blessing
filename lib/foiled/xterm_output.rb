@@ -10,6 +10,14 @@ class XtermOutput
       out "\x1b[48;5;#{bg}m" if bg
     end
 
+    # fg and bg are r-g-b arrays: [0..255, 0..255, 0..255]
+    # This is not supported by iTerm2: http://code.google.com/p/iterm2/issues/detail?id=218
+    # konsole supports it: https://github.com/robertknight/konsole/blob/master/user-doc/README.moreColors
+    def set_color_24bit(fg, bg=nil)
+      out "\x1b[38;2;#{fg.join(';')}m" if fg
+      out "\x1b[48;2;#{bg.join(';')}m" if bg
+    end
+
     def reset_color
       out "\x1b[0m"
     end
@@ -19,6 +27,9 @@ class XtermOutput
       out txt
       reset_color
     end
+
+    def set_bold; out "\x1b[1m" end
+    def set_underline; out "\x1b[4m" end
   end
   include SetColor
 

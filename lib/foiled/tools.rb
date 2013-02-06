@@ -95,14 +95,21 @@ module Tools
 
   # r, g, b are in 0..1
   def rgb_screen_color(r, g, b)
+    return gray_screen_color(r) if r==g && g==b
     16 + (r*5.9).to_i * 36 + (g*5.9).to_i * 6 + (b*5.9).to_i
   end
 
   # g is in 0..1
   def gray_screen_color(g)
-    232 + (g*23).to_i
+    g = (g*24.9).to_i
+    case g
+    when 0 then 0
+    when 24 then 15
+    else 232 + g
+    end
   end
 
+  def color(*args); Foiled::Color.new *args end
   def window(*args); Foiled::Window.new *args end
   def buffer(*args); Foiled::Buffer.new *args end
 end

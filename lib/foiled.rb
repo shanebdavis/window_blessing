@@ -11,6 +11,7 @@ See README for licence information.
 
 %w{
   constants
+  color
   tools
   buffer
   version
@@ -24,6 +25,8 @@ See README for licence information.
   buffered_screen
   window
   windowed_screen
+  widgets/draggable_background
+  widgets/label
   widgets/slider
 }.each do |file|
   require "foiled/#{file}"

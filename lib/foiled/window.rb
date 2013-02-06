@@ -99,17 +99,22 @@ class Window
   # you should never set the parent directly
   def parent=(p) @parent = p; end
 
+  # override; event is in local-space
+  def pointer_event_on_background(event)
+  end
+
+  # event is in parent-space
   def pointer_event(event)
     event[:loc] -= area.loc
-    XtermLog.log "event=#{event}"
-    @mouse_focused || children.reverse_each do |child|
-      if child.area.contains? event[:loc]
-        @mouse_focused=child
-        break
-      end
+    @pointer_focused ||= children.reverse_each.select do |child|
+      child.area.contains? event[:loc]
+    end.first || :background
+    if @pointer_focused==:background
+      pointer_event_on_background(event)
+    else
+      @pointer_focused.pointer_event event
     end
-    @mouse_focused.pointer_event event if @mouse_focused
-    @mouse_focused = nil if event[:button] == :button_up
+    @pointer_focused = nil if event[:button] == :button_up
   end
 
   ################################
@@ -159,8 +164,12 @@ class Window
     parent && parent.request_internal_redraw(area)
   end
 
+  def draw_background
+    buffer.fill :string => ' ', :bg => bg, :fg => fg
+  end
+
   def draw_internal
-    buffer.fill :string => ' ', :bg => bg
+    draw_background
     children.each do |child|
       child.draw buffer, (buffer.crop_area - child.loc)
     end
@@ -176,8 +185,8 @@ class Window
     return if internal_area.size <= point
 
     if @requested_redraw_area
-      buffer.crop(internal_area) {draw_internal}
-      @requested_redraw_area = nil if internal_area.contains?(@requested_redraw_area)
+      buffer.cropped(internal_area) {draw_internal}
+      @requested_redraw_area = nil if @requested_redraw_area && internal_area.contains?(@requested_redraw_area)
     end
 
     target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer

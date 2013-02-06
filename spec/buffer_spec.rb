@@ -4,8 +4,8 @@ module Foiled
 describe "Buffer" do
   include Tools
 
-  def test_frame
-    buffer(point(4,4), :contents => %w{1234 2345 3456 4567})
+  def test_frame(options={})
+    buffer(point(4,4), {:contents => %w{1234 2345 3456 4567}}.merge(options))
   end
 
   it "blank fb" do
@@ -34,7 +34,7 @@ describe "Buffer" do
   end
 
   it "crop" do
-    (f=buffer(point 4,4)).crop(rect(1,1,2,2)) do
+    (f=buffer(point 4,4)).cropped(rect(1,1,2,2)) do
       f.crop_area.should == rect(1,1,2,2)
       f.cropped?.should == true
     end
@@ -47,7 +47,7 @@ describe "Buffer" do
   end
 
   it "cropped fill" do
-    (f=test_frame).crop(rect(1,1,2,1)) do
+    (f=test_frame).cropped(rect(1,1,2,1)) do
       f.fill :string => '-'
     end.to_s.should == "1234\n2--5\n3456\n4567"
   end
@@ -75,9 +75,61 @@ describe "Buffer" do
   it "cropped draw_buffer" do
     f1 = test_frame
     f2 = buffer(point(2,2), :contents => "ab\nbc")
-    f1.crop(rect(1,1,2,1)) do
+    f1.cropped(rect(1,1,2,1)) do
       f1.draw_buffer(point(1,1),f2)
     end.to_s.should == "1234\n2ab5\n3456\n4567"
+  end
+
+  it "fill only overwrites what is provided" do
+    f0 = test_frame :bg => 9, :fg => 8
+
+    f1 = f0.clone
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
+
+    f1.fill :string => "!"
+    f1.to_s.should == "!!!!\n!!!!\n!!!!\n!!!!"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
+
+    f1 = f0.clone
+    f1.fill :bg => 0
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+
+    f1 = f0.clone
+    f1.fill :fg => 0
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
+  end
+
+  it "cropped fill only overwrites what is provided" do
+    f0 = test_frame :bg => 9, :fg => 8
+
+    f1 = f0.clone
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
+
+    f1.cropped(rect(1,1,2,2)) {f1.fill :string => "!"}
+    f1.to_s.should == "1234\n2!!5\n3!!6\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
+
+    f1 = f0.clone
+    f1.cropped(rect(1,1,2,2)) {f1.fill :bg => 0}
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 0, 0, 9], [9, 0, 0, 9], [9, 9, 9, 9]]
+
+    f1 = f0.clone
+    f1.cropped(rect(1,1,2,2)) {f1.fill :fg => 0}
+    f1.to_s.should == "1234\n2345\n3456\n4567"
+    f1.fg_buffer.should == [[8, 8, 8, 8], [8, 0, 0, 8], [8, 0, 0, 8], [8, 8, 8, 8]]
+    f1.bg_buffer.should == [[9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9], [9, 9, 9, 9]]
   end
 
   it "dirty" do
