@@ -62,12 +62,6 @@ def gray_window(r)
   w
 end
 
-def draw_instructions(screen)
-  b = Foiled::Buffer.new point(screen.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
-
-  screen.screen_buffer.draw_buffer point, b
-end
-
 Foiled::WindowedScreen.new.start(:full=>true) do |screen|
   r = rect 10, 10, 6, 3
 
