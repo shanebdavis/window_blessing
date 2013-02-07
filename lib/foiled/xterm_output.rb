@@ -134,14 +134,6 @@ raw may set the following:
     return unless str.length > 0
     cursor loc
 
-=begin
-    str.chars.zip(fg,bg).each do |c,f,b|
-      set_color f, b
-      out c
-    end
-    # The code below is more than 3x faster than the simple code above
-=end
-
     change_fg fg[0]
     change_bg bg[0]
 
