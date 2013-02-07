@@ -24,7 +24,7 @@ describe "Window" do
   it 'add_child' do
     w = window rect(0,0,4,4)
     c = window rect(1,1,1,2)
-    c.contents = "*\n*"
+    c.buffer.contents = "*\n*"
     w.add_child c
     w.draw
     w.buffer.to_s.should == "    \n *  \n *  \n    "
