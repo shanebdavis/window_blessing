@@ -86,12 +86,16 @@ class ColorPicker < Window
 
     add_child Label.new(rect(2,0,100,1),"Color Picker - Q to quit", :bg => self.bg, :fg => self.fg)
 
-    @red_slider = add_child FadeSlider.new(rect(2,area.size.y - 10,25,1),Color.black,Color.red)
-    @green_slider = add_child FadeSlider.new(rect(2,area.size.y - 8,25,1),Color.black,Color.green)
-    @blue_slider = add_child FadeSlider.new(rect(2,area.size.y - 6,25,1),Color.black,Color.blue)
-    @gray_slider = add_child FadeSlider.new(rect(2,area.size.y - 4,25,1),Color.black,Color.white)
-    @color_preview = add_child Window.new(rect(2,2,area.size.x - 20, area.size.y - 14))
+    @red_slider = add_child FadeSlider.new(rect(10,area.size.y - 10,25,1),Color.black,Color.red)
+    @green_slider = add_child FadeSlider.new(rect(10,area.size.y - 8,25,1),Color.black,Color.green)
+    @blue_slider = add_child FadeSlider.new(rect(10,area.size.y - 6,25,1),Color.black,Color.blue)
+    @gray_slider = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),Color.black,Color.white)
+
+    @red_value = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", :bg => color(0.1), :fg => Color.gray)
+
     @color2d = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6),color)
+
+    @color_preview = add_child Window.new(rect(2,2,area.size.x - 20, area.size.y - 14))
 
     @color_info_label = add_child Label.new(rect(2,area.size.y - 2,100,1),"info", :bg => self.bg, :fg => rgb_screen_color(1,1,1))
 

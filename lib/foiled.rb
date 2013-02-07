@@ -28,6 +28,7 @@ See README for licence information.
   widgets/draggable_background
   widgets/label
   widgets/slider
+  widgets/text_field
 }.each do |file|
   require "foiled/#{file}"
 end
