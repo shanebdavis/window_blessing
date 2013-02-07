@@ -7,6 +7,7 @@ include Foiled
 include Widgets
 
 class FadeSlider < Slider
+  attr_accessor_with_redraw :c1, :c2
   def initialize(area, c1, c2)
     super area
     @c1 = c1
@@ -15,9 +16,12 @@ class FadeSlider < Slider
 
   def draw_background
     size = buffer.size
-    size.x.times do |x|
-      c1[0]
+    step = (c2 - c1) / (size.x-1).to_f
+    line = size.x.times.collect do |x|
+      (c1 + step * x).to_screen_color
     end
+    buffer.bg_buffer = size.y.times.collect {line.clone}
+    buffer.fill :string => " ", :fg => @value > 0.5 ? Color.black : Color.white
   end
 end
 
@@ -45,7 +49,7 @@ class ColorPicker2D < Window
       c[chan1] = c1 = y / (s.y-1.0)
       s.x.times.collect do |x|
         c[chan2] = c2 =x / (s.x-1.0)
-        c.to_p
+        c.to_screen_color
       end
     end
 
@@ -82,10 +86,10 @@ class ColorPicker < Window
 
     add_child Label.new(rect(2,0,100,1),"Color Picker - Q to quit", :bg => self.bg, :fg => self.fg)
 
-    @red_slider = add_child Slider.new(rect 2,area.size.y - 10,area.size.x - 20,1)
-    @green_slider = add_child Slider.new(rect 2,area.size.y - 8,area.size.x - 20,1)
-    @blue_slider = add_child Slider.new(rect 2,area.size.y - 6,area.size.x - 20,1)
-    @gray_slider = add_child Slider.new(rect 2,area.size.y - 4,area.size.x - 20,1)
+    @red_slider = add_child FadeSlider.new(rect(2,area.size.y - 10,25,1),Color.black,Color.red)
+    @green_slider = add_child FadeSlider.new(rect(2,area.size.y - 8,25,1),Color.black,Color.green)
+    @blue_slider = add_child FadeSlider.new(rect(2,area.size.y - 6,25,1),Color.black,Color.blue)
+    @gray_slider = add_child FadeSlider.new(rect(2,area.size.y - 4,25,1),Color.black,Color.white)
     @color_preview = add_child Window.new(rect(2,2,area.size.x - 20, area.size.y - 14))
     @color2d = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6),color)
 

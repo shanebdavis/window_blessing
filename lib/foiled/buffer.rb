@@ -172,6 +172,8 @@ class Buffer
     string = options[:string]
     fg = options[:fg]
     bg = options[:bg]
+    fg = fg.to_screen_color if fg.kind_of?(Color)
+    bg = bg.to_screen_color if bg.kind_of?(Color)
 
     if area != internal_area
       @contents  = overlay2d(area.loc, gen_array2d(area.size, string), contents)  if string
