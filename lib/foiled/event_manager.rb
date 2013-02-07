@@ -15,11 +15,10 @@ module Foiled
 #   :event_exception => if an exception escaped the event handler, a new event is handed to this handler. New event looks like this:
 #       :type => :event_exception, :event => original_event.clone, :exception => exception_caught, :handler => handler_that_threw_error
 class EventManager
-  attr_accessor :event_handlers, :events
+  attr_accessor :event_handlers
 
   def initialize
     @event_handlers = {}
-    clear_events
     add_handler(:unhandled_event){}
     add_handler(:event_exception) do |e|
       XtermLog.log "#{self.class}: event_exception: #{e[:exception].inspect}"
@@ -38,7 +37,7 @@ class EventManager
   end
 
   def send_to_each_handler(handlers, event)
-    raise "hell" if !handlers && event[:type] == :unhandled_event
+    raise "Internal Error: :unhandled_event must have handlers" if !handlers && event[:type] == :unhandled_event
     return handle_event :type => :unhandled_event, :event => event.clone unless handlers
 
     handlers.reverse_each do |handler|
@@ -61,17 +60,8 @@ class EventManager
     send_to_each_handler(event_handlers[type], event)
   end
 
-  def add_event(event) @events << event end
-  def add_events(events) @events += events end
-
-  def clear_events
-    @events = []
-  end
-
-  def handle_events
+  def handle_events(events)
     events.each {|event| handle_event(event)}
-    clear_events
-    handle_event :type => :tick
   end
 end
 end

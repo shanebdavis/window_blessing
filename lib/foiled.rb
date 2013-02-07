@@ -16,6 +16,7 @@ See README for licence information.
   buffer
   version
   event_parser
+  event_queue
   event_manager
   xterm_log
   xterm_output

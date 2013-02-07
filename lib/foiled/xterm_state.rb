@@ -13,9 +13,9 @@ class XtermState
       if old_state!=new_state
         case state_type
         when :size
-          event_manager.add_event :type => :resize, :old_size => old_state, :size => new_state, :raw => event[:raw]
+          event_manager.handle_event :type => :resize, :old_size => old_state, :size => new_state, :raw => event[:raw]
         else
-          event_manager.add_event :type => :state_change, :state_type => state_type, :old_state => old_state, :state => new_state, :raw => event[:raw]
+          event_manager.handle_event :type => :state_change, :state_type => state_type, :old_state => old_state, :state => new_state, :raw => event[:raw]
         end
 
       end

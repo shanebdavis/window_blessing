@@ -3,7 +3,7 @@ class XtermScreen
   include GuiGeo
   include GuiGeo::Tools
 
-  attr_accessor :input, :output, :event_manager, :state
+  attr_accessor :input, :output, :event_manager, :state, :event_queue
 
   def initialize
     @event_manager = EventManager.new
@@ -12,6 +12,7 @@ class XtermScreen
     @output = XtermOutput.new(@state)
     @running = true
     @pending_events = []
+    @event_queue = EventQueue.new
 
     @event_manager.add_handler :characters do |event|
       quit if event[:raw][/q/]
@@ -21,19 +22,31 @@ class XtermScreen
   def quit; @running = false; end
   def running?; @running; end
 
+  def queue_event(e); event_queue << e end
+  def queued_events?; !event_queue.empty? end
+
+  def queue_pending_xterm_events
+    event_queue << input.read_events
+  end
+
   def wait_for_events(max=100)
     count = max
-    while event_manager.events.length==0 && count > 0
-      event_manager.add_events input.read_events
+    while !queued_events? && count > 0
+      queue_pending_xterm_events
       count -= 1
       sleep 0.01
     end
-    raise "no events!" unless event_manager.events.length > 0
+    raise "no events!" unless queued_events?
+  end
+
+  def process_queued_events
+    event_manager.handle_events event_queue.pop_all
   end
 
   def process_events
-    event_manager.add_events input.read_events
-    event_manager.handle_events
+    queue_pending_xterm_events
+    queue_event :type => :tick
+    process_queued_events
   end
 
   def event_loop
