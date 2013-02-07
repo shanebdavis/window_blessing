@@ -37,7 +37,7 @@ class EventManager
   end
 
   def send_to_each_handler(handlers, event)
-    raise "Internal Error: :unhandled_event must have handlers" if !handlers && event[:type] == :unhandled_event
+    raise "Internal Error: :unhandled_event events must have a handler" if !handlers && event[:type] == :unhandled_event
     return handle_event :type => :unhandled_event, :event => event.clone unless handlers
 
     handlers.reverse_each do |handler|
