@@ -1,18 +1,35 @@
 module Foiled
 class Window
   include Tools
+
+  class << self
+    def Window.attr_accessor_with_redraw( *symbols )
+      symbols.each do | symbol |
+        class_eval <<ENDCODE
+        def #{symbol}
+          @#{symbol}
+        end
+
+        def #{symbol}=(value)
+          old_value = @#{symbol}
+          @#{symbol} = value
+          request_redraw_internal if old_value != @#{symbol}
+        end
+ENDCODE
+      end
+    end
+  end
+
+  attr_accessor_with_redraw :bg, :fg
+
   attr_reader :requested_redraw_area, :buffer
 
-
   # you should never set the parent directly
-  attr_accessor :parent
+  attr_reader :parent
   attr_accessor :area
-  attr_accessor :bg, :fg
 
-  private
   attr_reader :children
 
-  public
   def initialize(area=rect(0,0,20,20))
     @area = rect
     self.area = area
@@ -23,26 +40,11 @@ class Window
     @requested_redraw_area = nil
   end
 
+
   def fill(options={})
     @requested_redraw_area = nil
     @buffer.fill options
     request_redraw
-  end
-
-  def contents=(contents)
-    @requested_redraw_area = nil
-    @buffer = Buffer.new area.size, :bg => @bg, :contents => contents, :fg => @fg
-    request_redraw
-  end
-
-  def bg=(bg)
-    @bg = bg
-    request_internal_redraw
-  end
-
-  def fg=(fg)
-    @fg = fg
-    request_internal_redraw
   end
 
   def redraw_requested?
@@ -61,7 +63,7 @@ class Window
       request_redraw
     else
       @buffer = Buffer.new area.size
-      request_internal_redraw
+      request_redraw_internal
     end
   end
 
@@ -86,6 +88,8 @@ class Window
   def size=(new_size) self.area = rect area.loc, new_size end
   def loc=(new_loc) self.area = rect new_loc, area.size end
 
+  def pointer_inside?(loc) area.contains? loc end
+
   def move_onscreen
     return unless parent
     parent_area = rect(point, parent.area.size)
@@ -96,8 +100,8 @@ class Window
     rect @area.size
   end
 
-  # you should never set the parent directly
-  def parent=(p) @parent = p; end
+  # for internal use only!
+  def set_parent(p) @parent = p; end
 
   # override; event is in local-space
   def pointer_event_on_background(event)
@@ -106,9 +110,9 @@ class Window
   # event is in parent-space
   def pointer_event(event)
     event[:loc] -= area.loc
-    @pointer_focused ||= children.reverse_each.select do |child|
-      child.area.contains? event[:loc]
-    end.first || :background
+    @pointer_focused ||= children.reverse_each.find do |child|
+      child.pointer_inside? event[:loc]
+    end || :background
     if @pointer_focused==:background
       pointer_event_on_background(event)
     else
@@ -127,14 +131,14 @@ class Window
     @children = children.select {|c| c!=child}
     if @children.length!=length_before
       child.request_redraw
-      child.parent = nil
+      child.set_parent nil
       child
     end
   end
 
   def add_child(child)
     children << child
-    child.parent= self
+    child.set_parent self
     child.request_redraw
     child
   end
@@ -147,17 +151,31 @@ class Window
     children.each_with_index &block
   end
 
+  def path
+    [parent && parent.path,"#{self.class}#{self.area}"].flatten.compact.join(',')
+  end
+
   def parent_path
-    [parent && parent.parent_path,"#{self.class}#{self.area}"].flatten.compact.join(',')
+    parent && parent.path
   end
 
   ################################
   # DRAWING
   ################################
 
-  def request_internal_redraw(area = internal_area)
+  # sometimes you want to know where redraw requests are coming from
+  # Since request_redraw_internal is recursive, you don't want to log the stack trace with every call - just the first one
+  # This will log a stack-trace once per call
+  def log_request_redraw_internal
+    trace = Kernel.caller
+    return if trace.count {|line| line["request_redraw_internal"]} > 1
+    XtermLog.log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
+  end
+
+  def request_redraw_internal(area = internal_area)
     return if @requested_redraw_area && @requested_redraw_area.contains?(area)
     @requested_redraw_area = internal_area | (area & @requested_redraw_area)
+    #log_request_redraw_internal
     request_redraw @requested_redraw_area
   end
 
@@ -165,7 +183,7 @@ class Window
   def request_redraw(area = nil)
     area ||= internal_area
     area.loc += @area.loc
-    parent && parent.request_internal_redraw(area)
+    parent && parent.request_redraw_internal(area)
   end
 
   def draw_background
@@ -190,7 +208,7 @@ class Window
 
     if @requested_redraw_area
       buffer.cropped(internal_area) {draw_internal}
-      @requested_redraw_area = nil if @requested_redraw_area && internal_area.contains?(@requested_redraw_area)
+      @requested_redraw_area = nil if @requested_redraw_area && internal_area.contains?(@requested_redraw_area | self.internal_area)
     end
 
     target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer

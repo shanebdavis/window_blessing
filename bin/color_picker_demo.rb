@@ -22,28 +22,17 @@ class FadeSlider < Slider
 end
 
 class ColorPicker2D < Window
-  attr_accessor :color, :fixed_channel
+  attr_accessor_with_redraw :fixed_channel, :color
+
   def initialize(area,color,fixed_channel = :g)
     super area
     @color = color
     @fixed_channel = fixed_channel
-    request_internal_redraw
+    request_redraw_internal
   end
 
   def variable_channels
     [:r, :g, :b].select {|a| a!=fixed_channel}
-  end
-
-  def fixed_channel=(chan)
-    old_chan = @fixed_channel
-    @fixed_channel = chan
-    request_internal_redraw if old_chan != @fixed_channel
-  end
-
-  def color=(color)
-    old_color = @color
-    @color = color
-    request_internal_redraw if old_color != @color
   end
 
   def draw_background
@@ -62,7 +51,7 @@ class ColorPicker2D < Window
 
     l = point color[chan2]*(size.x-1), color[chan1]*(size.y-1)
     buffer.fill :string => " "
-    buffer.fill rect(l.x.to_i,l.y.to_i,1,1), :string => "+"
+    buffer.fill :area => rect(l.x.to_i,l.y.to_i,1,1), :string => "+"
   end
 
   def on_change(&block)
@@ -76,7 +65,7 @@ class ColorPicker2D < Window
     p = rect(0,0,1,1).bound(p)
     color[chan2] = p.x
     color[chan1] = p.y
-    request_internal_redraw
+    request_redraw_internal
     @change_callback.call(color) if @change_callback
   end
 end

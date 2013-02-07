@@ -1,33 +1,21 @@
 module Foiled
 module Widgets
 class Label < Foiled::Window
-  attr_accessor :text, :fill_options
+  attr_accessor_with_redraw :text, :fg, :bg
 
   def initialize(rect, text, fill_options={})
     super rect
     @text = text
-    @fill_options = fill_options
-    request_internal_redraw
+    @fg = fill_options[:fg]
+    @bg = fill_options[:bg]
+    request_redraw_internal
   end
+
+  def pointer_inside?(loc) false; end
 
   def draw_internal
-    self.contents = text
-    buffer.fill fill_options
-  end
-
-  def text=(text)
-    @text = text
-    request_internal_redraw
-  end
-
-  def fg=(fg)
-    fill_options[:fg] = fg
-    request_internal_redraw
-  end
-
-  def bg=(bg)
-    fill_options[:bg] = bg
-    request_internal_redraw
+    buffer.contents = text
+    buffer.fill :fg => fg, :bg => bg
   end
 
 end
