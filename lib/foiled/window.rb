@@ -26,11 +26,12 @@ ENDCODE
 
   # you should never set the parent directly
   attr_reader :parent
-  attr_accessor :area
+  attr_accessor :area, :event_manager
 
   attr_reader :children
 
   def initialize(area=rect(0,0,20,20))
+    @event_manager = EventManager.new(self)
     @area = rect
     self.area = area
     @bg = Buffer.default_bg
@@ -38,6 +39,15 @@ ENDCODE
     @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
     @children = []
     @requested_redraw_area = nil
+  end
+
+  # define event handler
+  def on(*args,&block)
+    event_manager.add_handler *args, &block
+  end
+
+  def handle_event(event)
+    @event_manager.handle_event(event)
   end
 
 
@@ -114,6 +124,7 @@ ENDCODE
       child.pointer_inside? event[:loc]
     end || :background
     if @pointer_focused==:background
+      handle_event(event)
       pointer_event_on_background(event)
     else
       @pointer_focused.pointer_event event

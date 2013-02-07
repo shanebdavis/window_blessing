@@ -6,7 +6,7 @@ class XtermScreen
   attr_accessor :input, :output, :event_manager, :state, :event_queue
 
   def initialize
-    @event_manager = EventManager.new
+    @event_manager = EventManager.new(self)
     @state = XtermState.new @event_manager
     @input = XtermInput.new
     @output = XtermOutput.new(@state)

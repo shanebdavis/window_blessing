@@ -35,7 +35,7 @@ class WindowedScreen < XtermScreen
       root_window.request_redraw_internal
     end
 
-    event_manager.add_handler :mouse do |event|
+    event_manager.add_handler :pointer do |event|
       root_window.pointer_event event.clone
     end
   end

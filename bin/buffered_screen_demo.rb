@@ -85,7 +85,7 @@ Foiled::BufferedScreen.new.start(:full=>true) do |screen|
     screen.screen_buffer.draw_buffer r.loc, demo_buffer
   end
 
-  screen.event_manager.add_handler :mouse do |event|
+  screen.event_manager.add_handler :pointer do |event|
     Foiled::XtermLog.log "mouse: drag #{event[:loc]}"
     r.loc = event[:loc] - demo_buffer.size/2
   end

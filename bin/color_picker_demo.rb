@@ -110,11 +110,15 @@ class ColorPicker < Window
     gray_slider.bg = gray_screen_color(0.5)
     gray_slider.fg = rgb_screen_color(1,1,1)
 
-    red_slider.on_change    {|v| @color2d.fixed_channel = :r;update_preview }
-    green_slider.on_change  {|v| @color2d.fixed_channel = :g;update_preview }
-    blue_slider.on_change   {|v| @color2d.fixed_channel = :b;update_preview }
-    gray_slider.on_change   {|v| set_gray v }
-    @color2d.on_change      {|v| set_color v }
+    red_slider.   on(:pointer, :button1_down) {@color2d.fixed_channel = :r}
+    green_slider. on(:pointer, :button1_down) {@color2d.fixed_channel = :g}
+    blue_slider.  on(:pointer, :button1_down) {@color2d.fixed_channel = :b}
+
+    red_slider.on_change    {|v| update_preview }
+    green_slider.on_change  {|v| update_preview }
+    blue_slider.on_change   {|v| update_preview }
+    gray_slider.on_change   {|v| set_gray v     }
+    @color2d.on_change      {|v| set_color v    }
     update_preview
   end
 

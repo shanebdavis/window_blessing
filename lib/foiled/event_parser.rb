@@ -119,7 +119,7 @@ class EventParser < BabelBridge::Parser
         96 => :wheel_down, 97 => :wheel_up
       }
       {
-        type: :mouse,
+        type: [:pointer, button_actions[s&99]],
         button: button_actions[s&99],
         state: s,
         loc: point(x,y)

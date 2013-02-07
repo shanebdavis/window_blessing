@@ -8,6 +8,12 @@ class Slider < Foiled::Window
     super rect
     @value = options[:value].to_f || 0.0
     self.bg = gray_screen_color(0.25)
+
+    on :pointer do |event|
+      x = event[:loc].x
+      set_value x / screen_value_range
+      request_redraw_internal
+    end
   end
 
   def on_change(&block)
@@ -38,12 +44,6 @@ class Slider < Foiled::Window
     old_value = v
     self.value = v
     @change_callback.call(@value, old_value) if @change_callback
-  end
-
-  def pointer_event_on_background(event)
-    x = event[:loc].x
-    set_value x / screen_value_range
-    request_redraw_internal
   end
 
 end

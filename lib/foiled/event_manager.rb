@@ -15,29 +15,29 @@ module Foiled
 #   :event_exception => if an exception escaped the event handler, a new event is handed to this handler. New event looks like this:
 #       :type => :event_exception, :event => original_event.clone, :exception => exception_caught, :handler => handler_that_threw_error
 class EventManager
-  attr_accessor :event_handlers
+  attr_accessor :event_handlers, :parent
 
-  def initialize
+  def initialize(parent)
+    @parent = parent
     @event_handlers = {}
-    add_handler(:unhandled_event){}
     add_handler(:event_exception) do |e|
-      XtermLog.log "#{self.class}: event_exception: #{e[:exception].inspect}"
+      XtermLog.log "#{self.class}(parent=#{parent.inspect}): event_exception: #{e[:exception].inspect}"
       XtermLog.log "  "+ e[:exception].backtrace.join("\n  ")
     end
-    add_handler(:all){}
+    add_handler(){}
   end
 
-  def add_handler(event_type, &block)
+  def add_handler(*event_type, &block)
     event_handlers[event_type] ||= []
     event_handlers[event_type] << block
   end
 
-  def add_last_handler(event_type, &block)
+  def add_last_handler(*event_type, &block)
     event_handlers[event_type] = [block] + (event_handlers[event_type] || [])
   end
 
   def send_to_each_handler(handlers, event)
-    raise "Internal Error: :unhandled_event events must have a handler" if !handlers && event[:type] == :unhandled_event
+    return if !handlers && event[:type] == :unhandled_event
     return handle_event :type => :unhandled_event, :event => event.clone unless handlers
 
     handlers.reverse_each do |handler|
@@ -56,8 +56,12 @@ class EventManager
 
   def handle_event(event)
     type = event[:type]
-    send_to_each_handler(event_handlers[:all], event) unless type == :tick || type == :unhandled_event
-    send_to_each_handler(event_handlers[type], event)
+    type = [type] unless type.kind_of?(Array)
+
+    type.length.times.reverse_each do |l|
+      send_to_each_handler(event_handlers[type[0..l]], event)
+    end
+    send_to_each_handler(event_handlers[[]], event) unless type == [:tick] || type == [:unhandled_event]
   end
 
   def handle_events(events)
