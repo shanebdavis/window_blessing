@@ -5,9 +5,29 @@ module Foiled
 
 class XtermOutput
   module SetColor
+    def change_fg(fg)
+      set_fg(fg) if fg!=@current_fg
+      @current_fg = fg
+    end
+
+    def change_bg(bg)
+      set_bg(bg) if bg!=@current_bg
+      @current_bg = bg
+    end
+
+    def set_fg(fg)
+      out "\x1b[38;5;#{fg}m"
+    end
+
+    def set_bg(bg)
+      out "\x1b[48;5;#{bg}m"
+    end
+
+    attr_reader :current_fg, :current_bg
+
     def set_color(fg, bg=nil)
-      out "\x1b[38;5;#{fg}m" if fg
-      out "\x1b[48;5;#{bg}m" if bg
+      set_fg(fg) if fg
+      set_bg(bg) if bg
     end
 
     # fg and bg are r-g-b arrays: [0..255, 0..255, 0..255]
@@ -19,6 +39,8 @@ class XtermOutput
     end
 
     def reset_color
+      @current_fg = 7
+      @current_bg = 0
       out "\x1b[0m"
     end
 
@@ -109,15 +131,41 @@ raw may set the following:
   end
 
   def out_at_with_color(loc, str, fg, bg)
+    return unless str.length > 0
     cursor loc
+
+=begin
     str.chars.zip(fg,bg).each do |c,f,b|
       set_color f, b
       out c
     end
+    # The code below is more than 3x faster than the simple code above
+=end
+
+    change_fg fg[0]
+    change_bg bg[0]
+
+    current_attrs = [current_fg, current_bg]
+
+    next_output_pos = 0
+    pos = 0
+
+    fg.zip(bg).each do |attrs|
+      if current_attrs!=attrs
+        out str[next_output_pos..pos-1]
+        change_fg attrs[0]
+        change_bg attrs[1]
+        current_attrs = attrs
+        next_output_pos = pos
+      end
+      pos += 1
+    end
+    out str[next_output_pos..-1]
   end
 
   def draw_buffer(loc, buffer)
     loc = loc.clone
+    reset_color
     buffer.each_line do |line,fg,bg|
       out_at_with_color loc, line, fg, bg
       loc.y += 1

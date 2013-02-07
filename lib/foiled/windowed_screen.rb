@@ -10,10 +10,17 @@ class WindowedScreen < XtermScreen
 
     event_manager.add_handler :tick do
       if redraw_area = root_window.requested_redraw_area
+        start = Time.now
         root_window.draw
         buffer = root_window.buffer
         output.draw_buffer buffer.dirty_area.loc, buffer.dirty_subbuffer
         buffer.clean
+        stop = Time.now
+        @total_time ||= 0
+        @draw_count ||= 0
+        @draw_count += 1
+        @total_time += stop - start
+        XtermLog.log "redraw time = #{((@total_time/@draw_count)*1000).to_i}ms size=#{redraw_area.size} = #{redraw_area.size.x * redraw_area.size.y}"
       end
     end
 

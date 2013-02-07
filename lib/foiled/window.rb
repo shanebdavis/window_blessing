@@ -147,14 +147,18 @@ class Window
     children.each_with_index &block
   end
 
+  def parent_path
+    [parent && parent.parent_path,"#{self.class}#{self.area}"].flatten.compact.join(',')
+  end
+
   ################################
   # DRAWING
   ################################
 
   def request_internal_redraw(area = internal_area)
     return if @requested_redraw_area && @requested_redraw_area.contains?(area)
-    @requested_redraw_area = (internal_area | area) & @requested_redraw_area
-    request_redraw area
+    @requested_redraw_area = internal_area | (area & @requested_redraw_area)
+    request_redraw @requested_redraw_area
   end
 
   # ask the parent to redraw all, or, if area is set, some of the area covered by this window
