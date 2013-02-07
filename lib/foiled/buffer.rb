@@ -49,6 +49,16 @@ class Buffer
     @contents.zip(fg_buffer,bg_buffer).each &block
   end
 
+  def fg_buffer=(fg_buffer)
+    @fg_buffer = fg_buffer
+    normalize
+  end
+
+  def bg_buffer=(bg_buffer)
+    @bg_buffer = bg_buffer
+    normalize
+  end
+
   def normalize
     @contents  = resize2d @contents , size, " "
     @fg_buffer = resize2d @fg_buffer, size, Buffer.default_fg
@@ -141,23 +151,26 @@ class Buffer
   #  :bg => background color OR 1d array of bg-color pattern - nil => don't touch bg
   #  :fg => foreground color OR 1d array of fg-color pattern - nil => don't touch fb
   #  :string => string - length 1 or more, use to fill-init @contents - nil => don't touch @contents
-  def fill(options = {})
+  def fill(options = {}, and_options={})
+    area = crop_area
+    if options.kind_of? Rectangle
+      area = area | options
+      options = and_options
+    end
     string = options[:string]
     fg = options[:fg]
     bg = options[:bg]
 
-    if cropped?
-      c = crop_area
-      dirty crop_area
-      @contents  = overlay2d(c.loc, gen_array2d(c.size,string), contents)  if string
-      @fg_buffer = overlay2d(c.loc, gen_array2d(c.size,fg),     fg_buffer) if fg
-      @bg_buffer = overlay2d(c.loc, gen_array2d(c.size,bg),     bg_buffer) if bg
+    if area != internal_area
+      @contents  = overlay2d(area.loc, gen_array2d(area.size,string), contents)  if string
+      @fg_buffer = overlay2d(area.loc, gen_array2d(area.size,fg),     fg_buffer) if fg
+      @bg_buffer = overlay2d(area.loc, gen_array2d(area.size,bg),     bg_buffer) if bg
     else
-      dirty internal_area
       @contents  = gen_array2d(size,string) if string
       @fg_buffer = gen_array2d(size,fg)     if fg
       @bg_buffer = gen_array2d(size,bg)     if bg
     end
+    dirty area
     self
   end
 

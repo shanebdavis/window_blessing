@@ -30,13 +30,19 @@ class Slider < Foiled::Window
   def value=(v)
     old_value = @value
     @value = bound(0.0,v,1.0)
-    @change_callback.call(@value, old_value) if @change_callback
     request_internal_redraw
+  end
+
+  # triggers callbacks
+  def set_value(v)
+    old_value = v
+    self.value = v
+    @change_callback.call(@value, old_value) if @change_callback
   end
 
   def pointer_event_on_background(event)
     x = event[:loc].x
-    self.value = x / screen_value_range
+    set_value x / screen_value_range
     request_internal_redraw
   end
 
