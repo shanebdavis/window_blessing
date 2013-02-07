@@ -144,4 +144,5 @@ end
 
 WindowedScreen.new.start(:full=>true, :utf8 => true) do |screen|
   screen.root_window.add_child ColorPicker.new
+  screen.root_window.add_child(ColorPicker.new).loc = point
 end
