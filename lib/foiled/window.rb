@@ -20,18 +20,19 @@ ENDCODE
     end
   end
 
+  include Evented
+
   attr_accessor_with_redraw :bg, :fg
 
   attr_reader :requested_redraw_area, :buffer
 
   # you should never set the parent directly
   attr_reader :parent
-  attr_accessor :area, :event_manager
+  attr_accessor :area
 
   attr_reader :children
 
   def initialize(area=rect(0,0,20,20))
-    @event_manager = EventManager.new(self)
     @area = rect
     self.area = area
     @bg = Buffer.default_bg
@@ -40,16 +41,6 @@ ENDCODE
     @children = []
     @requested_redraw_area = nil
   end
-
-  # define event handler
-  def on(*args,&block)
-    event_manager.add_handler *args, &block
-  end
-
-  def handle_event(event)
-    @event_manager.handle_event(event)
-  end
-
 
   def fill(options={})
     @requested_redraw_area = nil

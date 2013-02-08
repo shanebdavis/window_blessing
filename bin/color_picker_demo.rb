@@ -8,8 +8,8 @@ include Widgets
 
 class FadeSlider < Slider
   attr_accessor_with_redraw :c1, :c2
-  def initialize(area, c1, c2)
-    super area
+  def initialize(area, ev, c1, c2)
+    super area, ev
     @c1 = c1
     @c2 = c2
   end
@@ -21,18 +21,37 @@ class FadeSlider < Slider
       (c1 + step * x).to_screen_color
     end
     buffer.bg_buffer = size.y.times.collect {line.clone}
-    buffer.fill :string => " ", :fg => @value > 0.5 ? Color.black : Color.white
+    buffer.fill :string => " ", :fg => value > 0.5 ? Color.black : Color.white
   end
 end
 
 class ColorPicker2D < Window
-  attr_accessor_with_redraw :fixed_channel, :color
+  include Evented
+  attr_accessor_with_redraw :fixed_channel
+  attr_reader :color_ev
 
-  def initialize(area,color,fixed_channel = :g)
+  def initialize(area,color_ev,fixed_channel = :g)
     super area
-    @color = color
+    @color_ev = color_ev
     @fixed_channel = fixed_channel
     request_redraw_internal
+
+    on :pointer do |event|
+      loc = event[:loc]
+      color = color_ev.get
+      old_color = color.clone
+
+      chan1, chan2 = variable_channels
+      p = loc / (size - point(1.0,1.0))
+      color[chan2] = bound(0.0, p.x, 1.0)
+      color[chan1] = bound(0.0, p.y, 1.0)
+
+      color_ev.set color
+    end
+
+    color_ev.on :refresh do
+      request_redraw_internal
+    end
   end
 
   def variable_channels
@@ -41,6 +60,7 @@ class ColorPicker2D < Window
 
   def draw_background
     chan1, chan2 = variable_channels
+    color = color_ev.get
     s = size
     c = color.clone
     c[chan1] = 0
@@ -57,89 +77,82 @@ class ColorPicker2D < Window
     buffer.fill :string => " "
     buffer.fill :area => rect(l.x.to_i,l.y.to_i,1,1), :string => "+"
   end
+end
 
-  def on_change(&block)
-    @change_callback = block
-  end
+class ColorPreview < Window
+  def initialize(area, color_ev)
+    super area
+    @color_ev = color_ev
+    buffer.fill :string => "Mr. Hungerton, her father, really was the most tactless person upon earth, -- a fluffy, feathery, untidy cockatoo of a man, perfectly good-natured, but absolutely centered upon his own silly self.  If anything could have driven me from Gladys, it would have been the thought of such a father-in-law.  I am convinced that he really believed in his heart that I came round to the Chestnuts three days a week for the pleasure of his company, and very especially to hear his views upon bimetallism, a subject upon which he was by way of being an authority. "
 
-  def pointer_event_on_background(event)
-    loc = event[:loc]
-    chan1, chan2 = variable_channels
-    p = loc / (size - point(1.0,1.0))
-    p = rect(0,0,1,1).bound(p)
-    color[chan2] = p.x
-    color[chan1] = p.y
-    request_redraw_internal
-    @change_callback.call(color) if @change_callback
+    color_ev.on :refresh do
+      buffer.fill :bg => rgb_screen_color(*color_ev.get.to_a)
+      request_redraw
+    end
   end
 end
 
 class ColorPicker < Window
   include DraggableBackground
-  attr_accessor :red_slider, :green_slider, :blue_slider, :gray_slider, :color_preview
+  attr_accessor :red_slider, :green_slider, :blue_slider, :gray_slider, :color_preview, :color2d, :red_value_field
+
+  attr_accessor :color_ev, :r_ev, :g_ev, :b_ev, :gray_ev
+
+  def create_evented_variables(initial_color)
+    @color_ev  = EventedVariable.new(initial_color)
+    @r_ev      = EventedVariable.new(initial_color.r).on(:change)  {|event| color = color_ev.get; color.r = event[:value]; color_ev.set color}
+    @g_ev      = EventedVariable.new(initial_color.g).on(:change)  {|event| color = color_ev.get; color.g = event[:value]; color_ev.set color}
+    @b_ev      = EventedVariable.new(initial_color.b).on(:change)  {|event| color = color_ev.get; color.b = event[:value]; color_ev.set color}
+    @gray_ev   = EventedVariable.new(initial_color.br).on(:change) {|event| color_ev.set color(event[:value]) }
+
+    color_ev.on(:change) do |event|
+      color = event[:value]
+      r_ev.set color.r
+      g_ev.set color.g
+      b_ev.set color.b
+      gray_ev.refresh color.br
+
+#      color_preview.color = current_color
+      update_label
+      red_value_field.text = color.r256.to_s
+    end
+  end
+
+  def current_color
+    @color_ev.get
+  end
+
   def initialize *args
     super rect(2,2,60,30)
     self.bg = gray_screen_color 0.2
     self.fg = gray_screen_color 0.5
 
-    @color = color
+    create_evented_variables(Color.black)
 
     add_child Label.new(rect(2,0,100,1),"Color Picker - Q to quit", :bg => self.bg, :fg => self.fg)
 
-    @red_slider = add_child FadeSlider.new(rect(10,area.size.y - 10,25,1),Color.black,Color.red)
-    @green_slider = add_child FadeSlider.new(rect(10,area.size.y - 8,25,1),Color.black,Color.green)
-    @blue_slider = add_child FadeSlider.new(rect(10,area.size.y - 6,25,1),Color.black,Color.blue)
-    @gray_slider = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),Color.black,Color.white)
+    @red_slider       = add_child FadeSlider.new(rect(10,area.size.y - 10,25,1), r_ev,    Color.black, Color.red  )
+    @green_slider     = add_child FadeSlider.new(rect(10,area.size.y - 8,25,1),  g_ev,    Color.black, Color.green)
+    @blue_slider      = add_child FadeSlider.new(rect(10,area.size.y - 6,25,1),  b_ev,    Color.black, Color.blue )
+    @gray_slider      = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),  gray_ev, Color.black, Color.white)
 
-    @red_value = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", :bg => color(0.1), :fg => Color.gray)
+    @red_value_field  = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", :bg => color(0.1), :fg => Color.gray)
 
-    @color2d = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6),color)
+    @color2d          = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6), color_ev)
 
-    @color_preview = add_child Window.new(rect(2,2,area.size.x - 20, area.size.y - 14))
+    @color_preview    = add_child ColorPreview.new(rect(2,2,area.size.x - 20, area.size.y - 14), color_ev)
 
     @color_info_label = add_child Label.new(rect(2,area.size.y - 2,100,1),"info", :bg => self.bg, :fg => rgb_screen_color(1,1,1))
-
-    @color_preview.buffer.fill :string => "Mr. Hungerton, her father, really was the most tactless person upon earth, -- a fluffy, feathery, untidy cockatoo of a man, perfectly good-natured, but absolutely centered upon his own silly self.  If anything could have driven me from Gladys, it would have been the thought of such a father-in-law.  I am convinced that he really believed in his heart that I came round to the Chestnuts three days a week for the pleasure of his company, and very especially to hear his views upon bimetallism, a subject upon which he was by way of being an authority. "
-
-    red_slider.bg = rgb_screen_color(1,0,0)
-    red_slider.fg = rgb_screen_color(0,0,0)
-    green_slider.bg = rgb_screen_color(0,1,0)
-    green_slider.fg = rgb_screen_color(0,0,0)
-    blue_slider.bg = rgb_screen_color(0,0,1)
-    blue_slider.fg = rgb_screen_color(1,1,1)
-    gray_slider.bg = gray_screen_color(0.5)
-    gray_slider.fg = rgb_screen_color(1,1,1)
 
     red_slider.   on(:pointer, :button1_down) {@color2d.fixed_channel = :r}
     green_slider. on(:pointer, :button1_down) {@color2d.fixed_channel = :g}
     blue_slider.  on(:pointer, :button1_down) {@color2d.fixed_channel = :b}
 
-    red_slider.on_change    {|v| update_preview }
-    green_slider.on_change  {|v| update_preview }
-    blue_slider.on_change   {|v| update_preview }
-    gray_slider.on_change   {|v| set_gray v     }
-    @color2d.on_change      {|v| set_color v    }
-    update_preview
+    update_label
   end
 
-  def set_color(c)
-    red_slider.value=c.r
-    blue_slider.value=c.b
-    green_slider.value=c.g
-    update_preview
-  end
-
-  def set_gray(value)
-    red_slider.value=blue_slider.value=green_slider.value=value
-    update_preview
-  end
-
-  def update_preview
-    @color_info_label.text = "Color: ##{@color.to_hex} / (#{"%.2f, %.2f, %.2f"%@color.to_a}) / (#{@color.to_a256.join(', ')})"
-    @color = color(red_slider.value, green_slider.value, blue_slider.value)
-    @color_preview.buffer.fill :bg => rgb_screen_color(*@color.to_a)
-    @color_preview.request_redraw
-    @color2d.color = @color
+  def update_label
+    @color_info_label.text = "Color: #{current_color.to_hex} / (#{"%.2f, %.2f, %.2f"%current_color.to_a}) / (#{current_color.to_a256.join(', ')})"
   end
 end
 

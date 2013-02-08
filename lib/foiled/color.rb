@@ -22,6 +22,10 @@ class Color < Struct.new(:r, :g, :b)
     end
   end
 
+  def br
+    (r + g + b) / 3.0
+  end
+
   def hex=(hex)
     raise "invalid hex color #{hex.inspect}" unless hex[/#?(((..)(..)(..))|((.)(.)(.)))/]
     self.r = ($3 || ($7*2)).hex/255.0

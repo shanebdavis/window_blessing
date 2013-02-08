@@ -18,6 +18,8 @@ See README for licence information.
   event_parser
   event_queue
   event_manager
+  evented
+  evented_variable
   xterm_log
   xterm_output
   xterm_state

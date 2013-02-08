@@ -16,6 +16,13 @@ module Tools
     return pos, span[0..(length - pos - 1)]
   end
 
+  def clone_value(v)
+    case v
+    when Fixnum, Bignum, Float then v
+    else v.clone
+    end
+  end
+
   # if the block is provided, yields the source elements and the target elements they are overlaying, in order, one at a time
   def overlay_span(pos, source_span, target_span, &block)
     pos, span = overlapping_span pos, source_span, target_span.length
