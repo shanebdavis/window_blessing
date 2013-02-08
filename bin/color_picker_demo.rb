@@ -112,7 +112,6 @@ class ColorPicker < Window
       b_ev.set color.b
       gray_ev.refresh color.br
 
-#      color_preview.color = current_color
       update_label
       red_value_field.text = color.r256.to_s
     end
