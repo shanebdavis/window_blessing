@@ -98,10 +98,6 @@ class Buffer
     contents.join "\n"
   end
 
-  def tab_size
-    2
-  end
-
   def internal_area
     rect(size)
   end
