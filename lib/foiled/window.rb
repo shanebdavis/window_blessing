@@ -42,12 +42,6 @@ ENDCODE
     @requested_redraw_area = nil
   end
 
-  def fill(options={})
-    @requested_redraw_area = nil
-    @buffer.fill options
-    request_redraw
-  end
-
   def redraw_requested?
     !!requested_redraw_area
   end
