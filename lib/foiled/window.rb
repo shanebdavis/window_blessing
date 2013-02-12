@@ -28,7 +28,6 @@ ENDCODE
 
   # you should never set the parent directly
   attr_reader :parent
-  attr_accessor :area
 
   attr_reader :children
 
@@ -42,57 +41,106 @@ ENDCODE
     @requested_redraw_area = nil
   end
 
+  module KeyboardFocus
+    # keyboard focusing
+    attr_reader :focused_child, :focused
+
+    # for internal use only
+    def focused_child=(child)
+      @focused_child = child
+    end
+
+    def focus
+      return if focused?
+      if parent
+        parent.focus
+        parent_focused_child = parent.focused_child
+        parent_focused_child.blur if parent_focused_child
+        parent.focused_child = self
+      end
+
+      @focused = true
+      handle_event :type => :focus
+    end
+
+    def blur
+      return if blurred?
+      if focused_child
+        focused_child.blur
+        @focused_child = nil
+      end
+
+      @focused = false
+      handle_event :type => :blur
+    end
+
+    def blurred?; !@focused end
+    def focused?; @focused end
+
+    def route_keyboard_event(event)
+      if focused_child
+        focused_child.route_keyboard_event event
+      end
+      handle_event event
+    end
+  end
+  include KeyboardFocus
+
+  module Geometry
+    attr_reader :area
+    def area=(area)
+      raise "rectangle area required" unless area.kind_of? GuiGeo::Rectangle
+      raise "size must be at least 1x1" unless area.size > point
+      return if area == @area
+      request_redraw  # request redraw before changing the area
+
+      old_size = @area.size
+      @area = area
+
+      if area.size != old_size
+        resize_buffer old_size
+        handle_event :type => :resize, :old_size => old_size, :size => area.size
+      else
+        # only location changed, request external redraw at the new location
+        request_redraw
+      end
+    end
+
+    def loc; area.loc; end
+    def loc=(new_loc) self.area = rect new_loc, area.size end
+
+    def size; area.size; end
+    def size=(new_size) self.area = rect area.loc, new_size end
+
+    def pointer_inside?(loc) area.contains? loc end
+
+    def move_onscreen
+      return unless parent
+      parent_area = rect(point, parent.area.size)
+      self.area = parent_area.bound(area)
+    end
+
+    def internal_area; rect(@area.size); end
+
+    private
+    def resize_buffer(old_size)
+      if area.size <= old_size
+        @buffer = @buffer.subbuffer(rect(area.size))
+        request_redraw
+      else
+        @buffer = Buffer.new area.size
+        request_redraw_internal
+      end
+    end
+  end
+  include Geometry
+
   def redraw_requested?
     !!requested_redraw_area
   end
 
   def inspect
     "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
-  end
-
-  def loc; area.loc; end
-
-  def size_changed(old_size)
-    if area.size <= old_size
-      @buffer = @buffer.subbuffer(rect(area.size))
-      request_redraw
-    else
-      @buffer = Buffer.new area.size
-      request_redraw_internal
-    end
-  end
-
-  def area=(area)
-    raise "rectangle area required" unless area.kind_of? GuiGeo::Rectangle
-    raise "size must be at least 1x1" unless area.size > point
-    return if area==@area
-    request_redraw
-
-    old_size = @area.size
-    @area = area
-
-    if area.size != old_size
-      size_changed(old_size)
-    else
-      request_redraw
-    end
-  end
-
-  def loc; area.loc; end
-  def size; area.size; end
-  def size=(new_size) self.area = rect area.loc, new_size end
-  def loc=(new_loc) self.area = rect new_loc, area.size end
-
-  def pointer_inside?(loc) area.contains? loc end
-
-  def move_onscreen
-    return unless parent
-    parent_area = rect(point, parent.area.size)
-    self.area = parent_area.bound(area)
-  end
-
-  def internal_area
-    rect @area.size
   end
 
   # for internal use only!
