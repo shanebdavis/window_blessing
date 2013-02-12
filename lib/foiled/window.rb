@@ -33,11 +33,7 @@ ENDCODE
   end
 
   def inspect
-    "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
-  end
-
-  def log(str)
-    super "#{self.class}<#{name || object_id}>: #{str}"
+    "<Window:#{name || object_id} area:#{area.to_s} children:#{children.length}>"
   end
 
   # event is in parent-space
@@ -88,7 +84,7 @@ ENDCODE
     end
 
     def blurred?; !@focused end
-    def focused?; @focused end
+    def focused?; !!@focused end
 
     def route_keyboard_event(event)
       if focused_child

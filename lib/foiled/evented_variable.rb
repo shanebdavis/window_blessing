@@ -20,6 +20,10 @@ class EventedVariable
     @value = value
   end
 
+  def inspect
+    "<#{self.class}:#{object_id} value:#{@value.inspect}>"
+  end
+
   def get; clone_value(@value) end
 
   # update the value & trigger :change and :refresh events

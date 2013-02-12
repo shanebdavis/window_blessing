@@ -97,7 +97,7 @@ end
 
 class ColorPicker < Window
   include DraggableBackground
-  attr_accessor :red_slider, :green_slider, :blue_slider, :gray_slider, :color_preview, :color2d, :red_value_field
+  attr_accessor :red_slider, :green_slider, :blue_slider, :gray_slider, :color_preview, :color2d, :red_value_field, :green_value_field, :blue_value_field
 
   attr_accessor :color_ev, :r_ev, :g_ev, :b_ev, :gray_ev
 
@@ -117,6 +117,8 @@ class ColorPicker < Window
 
       update_label
       red_value_field.text = color.r256.to_s
+      green_value_field.text = color.g256.to_s
+      blue_value_field.text = color.b256.to_s
     end
   end
 
@@ -139,6 +141,8 @@ class ColorPicker < Window
     @gray_slider      = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),  gray_ev, Color.black, Color.white)
 
     @red_value_field  = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", :bg => color(0.1), :fg => Color.gray)
+    @green_value_field= add_child TextField.new(rect(2,area.size.y - 8 ,5,1), "123", :bg => color(0.1), :fg => Color.gray)
+    @blue_value_field = add_child TextField.new(rect(2,area.size.y - 6 ,5,1), "123", :bg => color(0.1), :fg => Color.gray)
 
     @color2d          = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6), color_ev)
 

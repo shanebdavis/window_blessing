@@ -27,6 +27,10 @@ class EventManager
     add_handler(){}
   end
 
+  def inspect
+    "<#{self.class} :parent => #{parent.inspect} :handled_events => #{event_handlers.keys}>"
+  end
+
   def add_handler(*event_type, &block)
     event_handlers[event_type] ||= []
     event_handlers[event_type] << block
