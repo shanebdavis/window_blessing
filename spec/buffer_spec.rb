@@ -15,6 +15,7 @@ describe "Buffer" do
   it "string init" do
     buffer(point(4,4),:contents => ["hi","there"]).to_s.should == "hi  \nther\n    \n    "
     buffer(point(4,4),:contents => "hi\nthere").to_s.should == "hi  \nther\n    \n    "
+    buffer(point(4,4),:contents => "hi\n\t\0here").to_s.should == "hi  \n??he\n    \n    "
   end
 
   it "inspect" do

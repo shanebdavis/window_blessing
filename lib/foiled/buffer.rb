@@ -38,8 +38,6 @@ class Buffer
     @fg_buffer = options[:fg_buffer]
     @bg_buffer = options[:bg_buffer]
 
-    @contents = @contents.split("\n") if @contents.kind_of?(String)
-
     fill options
     normalize
     clean
@@ -60,12 +58,12 @@ class Buffer
   end
 
   def contents=(contents)
-    @contents  = contents
-    @contents = @contents.split("\n") if @contents.kind_of?(String)
+    @contents = contents
     normalize
   end
 
   def normalize
+    @contents  = @contents.gsub(/[\x00-\x09\x11-\x1f]/,'?').split("\n") if @contents.kind_of?(String)
     @contents  = resize2d @contents , size, " "
     @fg_buffer = resize2d @fg_buffer, size, Buffer.default_fg
     @bg_buffer = resize2d @bg_buffer, size, Buffer.default_bg
