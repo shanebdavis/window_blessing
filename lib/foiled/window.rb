@@ -5,7 +5,6 @@ class Window
   class << self
     def Window.attr_accessor_with_redraw( *symbols )
       symbols.each do | symbol |
-        puts "#{self} #Window.attr_accessor_with_redraw symbols=#{symbols}"
         class_eval <<ENDCODE
         def #{symbol}
           @#{symbol}
