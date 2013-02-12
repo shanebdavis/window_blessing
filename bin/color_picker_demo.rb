@@ -150,6 +150,8 @@ class ColorPicker < Window
     green_slider. on(:pointer, :button1_down) {@color2d.fixed_channel = :g}
     blue_slider.  on(:pointer, :button1_down) {@color2d.fixed_channel = :b}
 
+    @color_info_label.name = "info_label"
+
     update_label
   end
 

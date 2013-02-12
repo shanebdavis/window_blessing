@@ -116,6 +116,7 @@ module Tools
     end
   end
 
+  def log(str); XtermLog.log "#{self.class}<#{object_id}>: #{str}" end
   def color(*args); Foiled::Color.new *args end
   def window(*args); Foiled::Window.new *args end
   def buffer(*args); Foiled::Buffer.new *args end

@@ -21,6 +21,7 @@ ENDCODE
   end
 
   include Evented
+  attr_accessor :name
 
   def initialize(area=rect(0,0,20,20))
     @area = rect
@@ -29,6 +30,28 @@ ENDCODE
     @fg = Buffer.default_fg
     @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
     @children = []
+  end
+
+  def inspect
+    "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
+  end
+
+  def log(str)
+    super "#{self.class}<#{name || object_id}>: #{str}"
+  end
+
+  # event is in parent-space
+  def pointer_event(event)
+    event[:loc] -= area.loc
+    @pointer_focused ||= children.reverse_each.find do |child|
+      child.pointer_inside? event[:loc]
+    end || :background
+    if @pointer_focused==:background
+      handle_event(event)
+    else
+      @pointer_focused.pointer_event event
+    end
+    @pointer_focused = nil if event[:button] == :button_up
   end
 
   module KeyboardFocus
@@ -115,7 +138,6 @@ ENDCODE
     private
     def resize_buffer(old_size)
       @requested_redraw_area = internal_area | @requested_redraw_area if @requested_redraw_area
-      validate_requested_redraw_area
       if area.size <= old_size
         @buffer = @buffer.subbuffer(rect(area.size))
         request_redraw
@@ -171,24 +193,6 @@ ENDCODE
   end
   include ParentsAndChildren
 
-  def inspect
-    "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
-  end
-
-  # event is in parent-space
-  def pointer_event(event)
-    event[:loc] -= area.loc
-    @pointer_focused ||= children.reverse_each.find do |child|
-      child.pointer_inside? event[:loc]
-    end || :background
-    if @pointer_focused==:background
-      handle_event(event)
-    else
-      @pointer_focused.pointer_event event
-    end
-    @pointer_focused = nil if event[:button] == :button_up
-  end
-
   ################################
   # DRAWING
   ################################
@@ -202,15 +206,14 @@ ENDCODE
     def log_request_redraw_internal
       trace = Kernel.caller
       return if trace.count {|line| line["request_redraw_internal"]} > 1
-      XtermLog.log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
+      log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
     end
 
     def request_redraw_internal(area = internal_area)
-      return if @requested_redraw_area && @requested_redraw_area.contains?(area)
+      #return if @requested_redraw_area && @requested_redraw_area.contains?(area) - the color_picker demo's info label fails to update with this uncommented - why?
       @requested_redraw_area = internal_area | (area & @requested_redraw_area)
       #log_request_redraw_internal
 
-      validate_requested_redraw_area
       request_redraw @requested_redraw_area
     end
 
@@ -245,13 +248,7 @@ ENDCODE
       end
     end
 
-    def validate_requested_redraw_area
-      return unless @requested_redraw_area
-      raise "invalid @requested_redraw_area = #{@requested_redraw_area.inspect} area = #{area}" unless @requested_redraw_area.kind_of?(GuiGeo::Rectangle) &&
-        @requested_redraw_area.size > point &&
-        self.internal_area.contains?(@requested_redraw_area)
-    end
-
+    # marks "redrawn_area" of @buffer "up to date" (redraw no longer required)
     def clean(redrawn_area = @requested_redraw_area)
       @requested_redraw_area = nil if redrawn_area && redrawn_area.contains?(@requested_redraw_area)
     end
@@ -262,7 +259,6 @@ ENDCODE
     # 2) Draw @buffer to target_buffer (if set)
     # 3) returns the internal_area that was updated
     def draw(target_buffer = nil, internal_area = @requested_redraw_area)
-
       internal_area = self.internal_area | internal_area
 
       if internal_area.overlaps? @requested_redraw_area
