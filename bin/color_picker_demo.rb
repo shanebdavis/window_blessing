@@ -116,9 +116,9 @@ class ColorPicker < Window
       gray_ev.refresh color.br
 
       update_label
-      red_value_field.text = color.r256.to_s
-      green_value_field.text = color.g256.to_s
-      blue_value_field.text = color.b256.to_s
+      red_value_field.text    = color.r256.to_s if red_value_field.text.to_i != color.r256
+      green_value_field.text  = color.g256.to_s if green_value_field.text.to_i != color.g256
+      blue_value_field.text   = color.b256.to_s if blue_value_field.text.to_i != color.b256
     end
   end
 
@@ -131,7 +131,7 @@ class ColorPicker < Window
     self.bg = gray_screen_color 0.2
     self.fg = gray_screen_color 0.5
 
-    create_evented_variables(Color.black)
+    create_evented_variables(Color.white)
 
     add_child Label.new(rect(2,0,100,1),"Color Picker - Q to quit", :bg => self.bg, :fg => self.fg)
 
@@ -140,9 +140,10 @@ class ColorPicker < Window
     @blue_slider      = add_child FadeSlider.new(rect(10,area.size.y - 6,25,1),  b_ev,    Color.black, Color.blue )
     @gray_slider      = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),  gray_ev, Color.black, Color.white)
 
-    @red_value_field  = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", :bg => color(0.1), :fg => Color.gray)
-    @green_value_field= add_child TextField.new(rect(2,area.size.y - 8 ,5,1), "123", :bg => color(0.1), :fg => Color.gray)
-    @blue_value_field = add_child TextField.new(rect(2,area.size.y - 6 ,5,1), "123", :bg => color(0.1), :fg => Color.gray)
+    text_field_options = {:bg => color(0.1), :fg => Color.gray, :validator => /^[0-9]{0,3}$/}
+    @red_value_field  = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", text_field_options)
+    @green_value_field= add_child TextField.new(rect(2,area.size.y - 8 ,5,1), "123", text_field_options)
+    @blue_value_field = add_child TextField.new(rect(2,area.size.y - 6 ,5,1), "123", text_field_options)
 
     @color2d          = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6), color_ev)
 
@@ -154,7 +155,13 @@ class ColorPicker < Window
     green_slider. on(:pointer, :button1_down) {@color2d.fixed_channel = :g}
     blue_slider.  on(:pointer, :button1_down) {@color2d.fixed_channel = :b}
 
+    @red_value_field.evented_value.on(:change)    {|event|r_ev.set bound(0.0,event[:value].to_i/255.0,1.0)}
+    @green_value_field.evented_value.on(:change)  {|event|g_ev.set bound(0.0,event[:value].to_i/255.0,1.0)}
+    @blue_value_field.evented_value.on(:change)   {|event|b_ev.set bound(0.0,event[:value].to_i/255.0,1.0)}
+
     @color_info_label.name = "info_label"
+
+    color_ev.set Color.black
 
     update_label
   end

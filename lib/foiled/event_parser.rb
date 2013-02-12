@@ -4,7 +4,7 @@ module Foiled
 class EventParser < BabelBridge::Parser
   rule :root, many(:event) do
     def events
-      event.collect {|e| e = e.event; e[:string] ? e : e.merge(raw:e.to_s)}
+      event.collect {|e| ev = e.event; ev[:string] ? ev : ev.merge(raw:e.to_s)}
     end
   end
 
@@ -12,7 +12,7 @@ class EventParser < BabelBridge::Parser
     def events; []; end
   end
 
-  rule :event, /[^\e]+/ do
+  rule :event, /[^\e\x7F]+/ do
     def event; {:type => :string_input, :string => to_s} end
   end
 
@@ -38,6 +38,8 @@ class EventParser < BabelBridge::Parser
     end
   end
 
+  rule(:event, "\e\x7F")              {def event;{:type => [:key_press,:backspace], :key => :backspace, :modifiers => [:alt]};end}
+  rule(:event, "\x7F")                {def event;{:type => [:key_press,:backspace], :key => :backspace, :modifiers => []};end}
   rule(:event, "\e[O")                {def event;{:type => :blur};end}
   rule(:event, "\e[I")                {def event;{:type => :focus};end}
 
@@ -46,11 +48,10 @@ class EventParser < BabelBridge::Parser
 
     def modifiers
       m = key_press.modifier
-      m && m.modifiers
+      m ? m.modifiers : []
     end
   end
 
-  rule(:key_press, "\x7F")                {def key;:backspace;end}
   rule(:key_press, "\e", :modifier, "B")  {def key;:down;end}
   rule(:key_press, "\e", :modifier, "D")  {def key;:left;end}
   rule(:key_press, "\e", :modifier, "E")  {def key;:begin;end}
@@ -66,6 +67,12 @@ class EventParser < BabelBridge::Parser
   rule(:key_press, "\e", :modifier, "F")  {def key;:home;end}
   rule(:key_press, "\e", :modifier, "H")  {def key;:end;end}
 
+  rule :modifier, "\e", :modifier do
+    def modifiers
+      (modifier.modifiers || []) + [:alt]
+    end
+
+  end
   rule :modifier, "[", :numbers do
     def modifiers
       {
@@ -76,7 +83,7 @@ class EventParser < BabelBridge::Parser
       6 => [:shift, :control],
       7 => [:alt, :control],
       8 => [:shift, :alt, :control],
-      }[numbers.to_a[-1].to_i]
+      }[numbers.to_a[-1].to_i] || []
     end
   end
 
