@@ -9,7 +9,7 @@ include Widgets
 class FadeSlider < Slider
   attr_accessor_with_redraw :c1, :c2
   def initialize(area, ev, c1, c2)
-    super area, ev
+    super area, ev, key_press_step: 1/20.0
     @c1 = c1
     @c2 = c2
   end
@@ -115,9 +115,9 @@ class ColorPicker < Window
       gray_ev.refresh color.br
 
       update_label
-      @r_value_field.text = color.r256.to_s if @r_value_field.text.to_i != color.r256
-      @g_value_field.text = color.g256.to_s if @g_value_field.text.to_i != color.g256
-      @b_value_field.text = color.b256.to_s if @b_value_field.text.to_i != color.b256
+      @r_value_field.text = color.r256.to_s if @r_value_field.text != color.r256.to_s
+      @g_value_field.text = color.g256.to_s if @g_value_field.text != color.g256.to_s
+      @b_value_field.text = color.b256.to_s if @b_value_field.text != color.b256.to_s
     end
   end
 

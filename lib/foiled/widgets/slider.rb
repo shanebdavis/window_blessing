@@ -5,7 +5,9 @@ class Slider < Foiled::Window
   attr_reader :background, :evented_value
   attr_accessor :key_press_step
 
-  def initialize(rect, evented_value)
+  # options
+  #   :key_press_step => 0.1
+  def initialize(rect, evented_value, options={})
     rect.size.y = 1
     super rect
     @evented_value = evented_value = case evented_value
@@ -14,7 +16,7 @@ class Slider < Foiled::Window
     else raise ArgumentError.new "invalid text type #{evented_value.inspect}(#{evented_value.class})"
     end
     self.bg = gray_screen_color(0.25)
-    @key_press_step = 0.1
+    @key_press_step = options[:key_press_step] || 0.1
 
     on :pointer do |event|
       x = event[:loc].x
