@@ -22,10 +22,6 @@ ENDCODE
 
   include Evented
 
-  attr_accessor_with_redraw :bg, :fg
-
-  attr_reader :requested_redraw_area, :buffer
-
   def initialize(area=rect(0,0,20,20))
     @area = rect
     self.area = area
@@ -33,7 +29,6 @@ ENDCODE
     @fg = Buffer.default_fg
     @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
     @children = []
-    @requested_redraw_area = nil
   end
 
   module KeyboardFocus
@@ -119,6 +114,8 @@ ENDCODE
 
     private
     def resize_buffer(old_size)
+      @requested_redraw_area = internal_area | @requested_redraw_area if @requested_redraw_area
+      validate_requested_redraw_area
       if area.size <= old_size
         @buffer = @buffer.subbuffer(rect(area.size))
         request_redraw
@@ -174,16 +171,8 @@ ENDCODE
   end
   include ParentsAndChildren
 
-  def redraw_requested?
-    !!requested_redraw_area
-  end
-
   def inspect
     "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
-  end
-
-  # override; event is in local-space
-  def pointer_event_on_background(event)
   end
 
   # event is in parent-space
@@ -194,7 +183,6 @@ ENDCODE
     end || :background
     if @pointer_focused==:background
       handle_event(event)
-      pointer_event_on_background(event)
     else
       @pointer_focused.pointer_event event
     end
@@ -204,58 +192,89 @@ ENDCODE
   ################################
   # DRAWING
   ################################
+  module Drawing
+    Window.attr_accessor_with_redraw :bg, :fg
+    attr_reader :requested_redraw_area, :buffer
 
-  # sometimes you want to know where redraw requests are coming from
-  # Since request_redraw_internal is recursive, you don't want to log the stack trace with every call - just the first one
-  # This will log a stack-trace once per call
-  def log_request_redraw_internal
-    trace = Kernel.caller
-    return if trace.count {|line| line["request_redraw_internal"]} > 1
-    XtermLog.log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
-  end
-
-  def request_redraw_internal(area = internal_area)
-    return if @requested_redraw_area && @requested_redraw_area.contains?(area)
-    @requested_redraw_area = internal_area | (area & @requested_redraw_area)
-    #log_request_redraw_internal
-    request_redraw @requested_redraw_area
-  end
-
-  # ask the parent to redraw all, or, if area is set, some of the area covered by this window
-  def request_redraw(area = nil)
-    area ||= internal_area
-    area.loc += @area.loc
-    parent && parent.request_redraw_internal(area)
-  end
-
-  def draw_background
-    buffer.fill :string => ' ', :bg => bg, :fg => fg
-  end
-
-  def draw_internal
-    draw_background
-    children.each do |child|
-      child.draw buffer, (buffer.crop_area - child.loc)
-    end
-  end
-
-  # redraw self if there was a recent call to request_redraw
-  # draw to target_buffer if set
-  # returns the internal_area that was updated
-  def draw(target_buffer=nil, internal_area=nil)
-    internal_area ||= @requested_redraw_area
-    return unless internal_area
-    internal_area = internal_area | self.internal_area
-    return if internal_area.size <= point
-
-    if @requested_redraw_area
-      buffer.cropped(internal_area) {draw_internal}
-      @requested_redraw_area = nil if @requested_redraw_area && internal_area.contains?(@requested_redraw_area | self.internal_area)
+    # sometimes you want to know where redraw requests are coming from
+    # Since request_redraw_internal is recursive, you don't want to log the stack trace with every call - just the first one
+    # This will log a stack-trace once per call
+    def log_request_redraw_internal
+      trace = Kernel.caller
+      return if trace.count {|line| line["request_redraw_internal"]} > 1
+      XtermLog.log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
     end
 
-    target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer
+    def request_redraw_internal(area = internal_area)
+      return if @requested_redraw_area && @requested_redraw_area.contains?(area)
+      @requested_redraw_area = internal_area | (area & @requested_redraw_area)
+      #log_request_redraw_internal
 
-    internal_area
+      validate_requested_redraw_area
+      request_redraw @requested_redraw_area
+    end
+
+    # ask the parent to redraw all, or, if area is set, some of the area covered by this window
+    def request_redraw(redraw_area = nil)
+      redraw_area ||= internal_area
+      parent && parent.request_redraw_internal(rect(redraw_area.loc + @area.loc, redraw_area.size))
+    end
+
+    def redraw_requested?; !!requested_redraw_area end
+
+    # Reset @buffer to the designated background. The default implementation resets it to the ' ' character with @bg and @fg colors.
+    #
+    # NOTE: Buffer may have a cropping area set
+    #
+    # NOTE: Safe to override. Calling 'super' is optional. Should fully replace all character, foreground and background colors for @buffer's current croparea.
+    def draw_background
+      buffer.fill :string => ' ', :bg => bg, :fg => fg
+    end
+
+    # Update @buffer
+    #
+    # The default implementation calls #draw_background and then calls #draw on each child.
+    #
+    # NOTE: Buffer may have a cropping area set
+    #
+    # NOTE: Safe to override. Calling 'super' is optional.
+    def draw_internal
+      draw_background
+      children.each do |child|
+        child.draw buffer, (buffer.crop_area - child.loc)
+      end
+    end
+
+    def validate_requested_redraw_area
+      return unless @requested_redraw_area
+      raise "invalid @requested_redraw_area = #{@requested_redraw_area.inspect} area = #{area}" unless @requested_redraw_area.kind_of?(GuiGeo::Rectangle) &&
+        @requested_redraw_area.size > point &&
+        self.internal_area.contains?(@requested_redraw_area)
+    end
+
+    def clean(redrawn_area = @requested_redraw_area)
+      @requested_redraw_area = nil if redrawn_area && redrawn_area.contains?(@requested_redraw_area)
+    end
+
+    # Draw the window:
+    #
+    # 1) Draw the specified internal_area, or @requested_redraw_area by default, into @buffer
+    # 2) Draw @buffer to target_buffer (if set)
+    # 3) returns the internal_area that was updated
+    def draw(target_buffer = nil, internal_area = @requested_redraw_area)
+
+      internal_area = self.internal_area | internal_area
+
+      if internal_area.overlaps? @requested_redraw_area
+        buffer.cropped(internal_area | @requested_redraw_area) {draw_internal}
+        clean internal_area
+      end
+
+      target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer
+
+      internal_area
+    end
   end
+  include Drawing
 end
 end

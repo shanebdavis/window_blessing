@@ -19,6 +19,10 @@ class XtermScreen
     end
   end
 
+  def inspect
+    "<#{self.class}:#{object_id}>"
+  end
+
   def quit; @running = false; end
   def running?; @running; end
 

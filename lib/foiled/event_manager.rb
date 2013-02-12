@@ -21,7 +21,7 @@ class EventManager
     @parent = parent
     @event_handlers = {}
     add_handler(:event_exception) do |e|
-      XtermLog.log "#{self.class}(parent=#{parent.inspect}): event_exception: #{e[:exception].inspect}"
+      XtermLog.log "#{self.class}(parent=#{parent.inspect}): event_exception: #{e[:exception].inspect} event: #{e[:event].inspect}"
       XtermLog.log "  "+ e[:exception].backtrace.join("\n  ")
     end
     add_handler(){}

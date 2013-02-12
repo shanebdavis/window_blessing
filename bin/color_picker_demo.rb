@@ -83,12 +83,15 @@ class ColorPreview < Window
   def initialize(area, color_ev)
     super area
     @color_ev = color_ev
-    buffer.fill :string => "Mr. Hungerton, her father, really was the most tactless person upon earth, -- a fluffy, feathery, untidy cockatoo of a man, perfectly good-natured, but absolutely centered upon his own silly self.  If anything could have driven me from Gladys, it would have been the thought of such a father-in-law.  I am convinced that he really believed in his heart that I came round to the Chestnuts three days a week for the pleasure of his company, and very especially to hear his views upon bimetallism, a subject upon which he was by way of being an authority. "
 
     color_ev.on :refresh do
-      buffer.fill :bg => rgb_screen_color(*color_ev.get.to_a)
-      request_redraw
+      request_redraw_internal
     end
+  end
+
+  def draw_background
+    buffer.fill :string => "Mr. Hungerton, her father, really was the most tactless person upon earth, -- a fluffy, feathery, untidy cockatoo of a man, perfectly good-natured, but absolutely centered upon his own silly self.  If anything could have driven me from Gladys, it would have been the thought of such a father-in-law.  I am convinced that he really believed in his heart that I came round to the Chestnuts three days a week for the pleasure of his company, and very especially to hear his views upon bimetallism, a subject upon which he was by way of being an authority. ",
+      :bg => @color_ev.get
   end
 end
 
