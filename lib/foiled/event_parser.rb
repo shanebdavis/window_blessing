@@ -4,7 +4,7 @@ module Foiled
 class EventParser < BabelBridge::Parser
   rule :root, many(:event) do
     def events
-      event.collect {|e| e.event.merge(raw:e.to_s)}
+      event.collect {|e| e = e.event; e[:string] ? e : e.merge(raw:e.to_s)}
     end
   end
 
@@ -13,7 +13,7 @@ class EventParser < BabelBridge::Parser
   end
 
   rule :event, /[^\e]+/ do
-    def event; {:type => :characters} end
+    def event; {:type => :string_input, :string => to_s} end
   end
 
   rule :command, /[a-zA-Z]/
@@ -42,7 +42,7 @@ class EventParser < BabelBridge::Parser
   rule(:event, "\e[I")                {def event;{:type => :focus};end}
 
   rule :event, :key_press do
-    def event; {:type => :key_press, :key => key, :modifiers => modifiers} end
+    def event; {:type => [:key_press,key], :key => key, :modifiers => modifiers} end
 
     def modifiers
       m = key_press.modifier

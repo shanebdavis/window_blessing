@@ -38,6 +38,7 @@ ENDCODE
 
   # event is in parent-space
   def pointer_event(event)
+    focus
     event[:loc] -= area.loc
     @pointer_focused ||= children.reverse_each.find do |child|
       child.pointer_inside? event[:loc]

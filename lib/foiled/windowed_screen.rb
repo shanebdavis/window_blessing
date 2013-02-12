@@ -31,6 +31,10 @@ class WindowedScreen < XtermScreen
       end
     end
 
+    event_manager.add_handler :key_press do |event|
+      root_window.route_keyboard_event event
+    end
+
     event_manager.add_handler :resize do |event|
       root_window.size = event[:size]
       root_window.request_redraw_internal

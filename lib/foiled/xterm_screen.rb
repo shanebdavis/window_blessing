@@ -14,8 +14,8 @@ class XtermScreen
     @pending_events = []
     @event_queue = EventQueue.new
 
-    @event_manager.add_handler :characters do |event|
-      quit if event[:raw][/q/]
+    @event_manager.add_handler :string_input do |event|
+      quit if event[:string][/q/]
     end
   end
 

@@ -13,7 +13,6 @@ class TextField < Foiled::Window
     request_redraw_internal
 
     on :pointer do |event|
-      focus
       self.cursor_pos = event[:loc].x
     end
 

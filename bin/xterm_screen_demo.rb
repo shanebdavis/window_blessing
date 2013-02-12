@@ -24,7 +24,7 @@ Foiled::XtermScreen.new.start(:full=>true) do |screen|
     end
   end
 
-  event_manager.add_handler :all do |event|
+  event_manager.add_handler do |event|
     event_count += 1
     Foiled::XtermLog.log "last_event = #{event.inspect}"
     last_event = event

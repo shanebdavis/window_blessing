@@ -16,6 +16,21 @@ Or install it yourself as:
 
     $ gem install foiled
 
+## Potentially useful Unicode characters
+
+  "⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ "
+  http://www.csbruce.com/software/utf-8.html
+  "╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ ╈ ╉ ╊ ╋ "
+  "═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬"
+  "◠ ◡ ◦ ◧ ◨ ◩ ◪ ◫ ◬ ◭ ◮ "
+  "◰ ◱ ◲ ◳ ◴ ◵ ◶ ◷ ◸ ◹ ◺ ◿ "
+  "╬"
+   "▀▁▂▃▄▅▆▇█"
+   "▉▊▋▌▍▎▏▐"
+   "░▒▓"
+   "▔▕▖▗▘▙▚▛▜▝▞▟"
+   "▸▾"
+
 ## Usage
 
 TODO: Write usage instructions here
