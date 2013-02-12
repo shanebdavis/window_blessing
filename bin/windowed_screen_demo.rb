@@ -10,16 +10,6 @@ class DragWindow < Window
   include DraggableBackground
 end
 
-class InstructionsWindow < Window
-  def initialize
-    super rect(point,point(1000,1))
-    self.bg = gray_screen_color(0.2)
-    self.fg = rgb_screen_color(0.8,0.8,1.0)
-    self.contents = " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit."
-  end
-end
-
-
 def color_window(r)
   size = r.size
   b = Buffer.new(size).tap do |buffer|
@@ -72,7 +62,7 @@ WindowedScreen.new.start(:full=>true, :utf8 => true) do |screen|
 
   root_window.add_child gray_win = gray_window(rect(10,10,25,13))
   root_window.add_child color_win = color_window(rect(30,15,24,12))
-  root_window.add_child InstructionsWindow.new
+  root_window.add_child Label.new rect(point,point(1000,1)), " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", :bg => color(0.25)
 
 
   screen.event_manager.add_handler :key_press do |event|
