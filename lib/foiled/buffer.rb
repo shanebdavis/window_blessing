@@ -62,6 +62,10 @@ class Buffer
     normalize
   end
 
+  def sanitize_contents
+    @contents = @contents.collect {|l| l.gsub(/[\x00-\x1f]/,'?')}
+  end
+
   def normalize
     @contents  = @contents.gsub(/[\x00-\x09\x11-\x1f]/,'?').split("\n") if @contents.kind_of?(String)
     @contents  = resize2d @contents , size, " "
