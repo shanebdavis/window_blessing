@@ -26,11 +26,6 @@ ENDCODE
 
   attr_reader :requested_redraw_area, :buffer
 
-  # you should never set the parent directly
-  attr_reader :parent
-
-  attr_reader :children
-
   def initialize(area=rect(0,0,20,20))
     @area = rect
     self.area = area
@@ -135,6 +130,50 @@ ENDCODE
   end
   include Geometry
 
+
+  module ParentsAndChildren
+    attr_reader :parent
+    attr_reader :children
+
+    # returns nil if nothing was done, otherwise returns child
+    def remove_child(child)
+      length_before = children.length
+      @children = children.select {|c| c!=child}
+      if @children.length!=length_before
+        child.request_redraw
+        child.parent= nil
+        child
+      end
+    end
+
+    def add_child(child)
+      children << child
+      child.parent= self
+      child.request_redraw
+      child
+    end
+
+    # for internal use only!
+    def parent=(p) @parent = p; end
+
+    def each_child(&block)
+      children.each &block
+    end
+
+    def each_child_with_index(&block)
+      children.each_with_index &block
+    end
+
+    def path
+      [parent && parent.path,"#{self.class}#{self.area}"].flatten.compact.join(',')
+    end
+
+    def parent_path
+      parent && parent.path
+    end
+  end
+  include ParentsAndChildren
+
   def redraw_requested?
     !!requested_redraw_area
   end
@@ -142,9 +181,6 @@ ENDCODE
   def inspect
     "<Window:0x%x area:#{area.to_s} children:#{children.length}>"%object_id
   end
-
-  # for internal use only!
-  def set_parent(p) @parent = p; end
 
   # override; event is in local-space
   def pointer_event_on_background(event)
@@ -163,44 +199,6 @@ ENDCODE
       @pointer_focused.pointer_event event
     end
     @pointer_focused = nil if event[:button] == :button_up
-  end
-
-  ################################
-  # Children
-  ################################
-
-  # returns nil if nothing was done, otherwise returns child
-  def remove_child(child)
-    length_before = children.length
-    @children = children.select {|c| c!=child}
-    if @children.length!=length_before
-      child.request_redraw
-      child.set_parent nil
-      child
-    end
-  end
-
-  def add_child(child)
-    children << child
-    child.set_parent self
-    child.request_redraw
-    child
-  end
-
-  def each_child(&block)
-    children.each &block
-  end
-
-  def each_child_with_index(&block)
-    children.each_with_index &block
-  end
-
-  def path
-    [parent && parent.path,"#{self.class}#{self.area}"].flatten.compact.join(',')
-  end
-
-  def parent_path
-    parent && parent.path
   end
 
   ################################
