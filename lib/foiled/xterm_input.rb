@@ -4,7 +4,7 @@ class XtermInput
   attr_reader :event_parser
 
   def initialize
-    @event_parser = EventParser.new
+    @event_parser = XtermEventParser.new
   end
 
   def read_events

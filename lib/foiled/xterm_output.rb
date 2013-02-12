@@ -177,7 +177,7 @@ raw may set the following:
 
 
   # INTERNAL NOTE: xterm returns 3 numbers: ?, height, width
-  # Xterm sends back response as an escape sequence. EventParser knows how to capture and interpret the result.
+  # Xterm sends back response as an escape sequence. XtermEventParser knows how to capture and interpret the result.
   def request_xterm_size; out "\e[18t"; end
 
   # INTERNAL NOTE: xterm returns 3 numbers: ?, height, width

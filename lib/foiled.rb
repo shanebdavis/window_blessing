@@ -15,11 +15,11 @@ See README for licence information.
   tools
   buffer
   version
-  event_parser
   event_queue
   event_manager
   evented
   evented_variable
+  xterm_event_parser
   xterm_log
   xterm_output
   xterm_state
