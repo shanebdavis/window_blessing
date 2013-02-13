@@ -146,7 +146,6 @@ ENDCODE
   end
   include Geometry
 
-
   module ParentsAndChildren
     attr_reader :parent
     attr_reader :children
@@ -190,9 +189,6 @@ ENDCODE
   end
   include ParentsAndChildren
 
-  ################################
-  # DRAWING
-  ################################
   module Drawing
     Window.attr_accessor_with_redraw :bg, :fg
     attr_reader :requested_redraw_area, :buffer
