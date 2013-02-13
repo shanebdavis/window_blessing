@@ -13,6 +13,7 @@ Foiled::XtermScreen.new.start(:full=>true) do |screen|
       cursor(0,0)
       reset_color
       puts Time.now
+      puts "Ctrl-Q to quit"
       puts "size: #{screen.state.size.inspect}"
 
       if last_event

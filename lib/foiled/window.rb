@@ -25,11 +25,11 @@ ENDCODE
 
   def initialize(area=rect(0,0,20,20))
     @area = rect
-    self.area = area
+    @children = []
     @bg = Buffer.default_bg
     @fg = Buffer.default_fg
     @buffer = Buffer.new area.size, :bg => @bg, :fg => @fg
-    @children = []
+    self.area = area
   end
 
   def inspect
@@ -109,6 +109,7 @@ ENDCODE
 
       if area.size != old_size
         resize_buffer old_size
+        children.each {|c| c.handle_event type: :parent_resize, old_size:old_size, size:area.size }
         handle_event :type => :resize, :old_size => old_size, :size => area.size
       else
         # only location changed, request external redraw at the new location
@@ -169,7 +170,10 @@ ENDCODE
     end
 
     # for internal use only!
-    def parent=(p) @parent = p; end
+    def parent=(p)
+      @parent = p
+      handle_event type: :parent_set
+    end
 
     def each_child(&block)
       children.each &block

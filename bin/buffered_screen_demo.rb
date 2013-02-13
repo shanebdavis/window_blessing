@@ -28,7 +28,7 @@ def gray_buffer(size)
 end
 
 def draw_instructions(screen)
-  b = Foiled::Buffer.new point(screen.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
+  b = Foiled::Buffer.new point(screen.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Ctrl-Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
 
   screen.screen_buffer.draw_buffer point, b
 end

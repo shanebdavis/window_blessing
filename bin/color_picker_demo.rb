@@ -132,7 +132,7 @@ class ColorPicker < Window
 
     create_evented_variables(Color.white)
 
-    add_child Label.new(rect(2,0,100,1),"Color Picker - Q to quit", :bg => self.bg, :fg => self.fg)
+    add_child Label.new(rect(2,0,100,1),"Color Picker - Ctrl-Q to quit", :bg => self.bg, :fg => self.fg)
 
     @r_slider     = add_child FadeSlider.new(rect(10,area.size.y - 10,25,1), r_ev,    Color.black, Color.red  )
     @g_slider     = add_child FadeSlider.new(rect(10,area.size.y - 8,25,1),  g_ev,    Color.black, Color.green)

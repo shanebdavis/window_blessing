@@ -14,8 +14,8 @@ class XtermScreen
     @pending_events = []
     @event_queue = EventQueue.new
 
-    @event_manager.add_handler :string_input do |event|
-      quit if event[:string][/q/]
+    @event_manager.add_handler :key_press do |event|
+      quit if event[:key]==:control_q
     end
   end
 
@@ -98,7 +98,11 @@ class XtermScreen
   ensure
     output.reset_all
     output.disable_utf8             if options[:utf8]
-    output.disable_alternate_screen if options[:full] || options[:alternate_screen]
+    if options[:full] || options[:alternate_screen]
+      output.reset_color
+      output.clear
+      output.disable_alternate_screen
+    end
   end
 
 end

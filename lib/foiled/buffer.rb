@@ -62,15 +62,18 @@ class Buffer
     normalize
   end
 
-  def sanitize_contents
-    @contents = @contents.collect {|l| l.gsub(/[\x00-\x1f]/,'?')}
+  def sanitize_contents(range=0..-1)
+    @contents[range] = @contents[range].collect {|l| l.gsub(/[\x00-\x1f]/,'?')}
   end
 
-  def normalize
+  def normalize(range=0..-1)
+    @contents||=[]
+    @fg_buffer||=[]
+    @bg_buffer||=[]
     @contents  = @contents.gsub(/[\x00-\x09\x11-\x1f]/,'?').split("\n") if @contents.kind_of?(String)
-    @contents  = resize2d @contents , size, " "
-    @fg_buffer = resize2d @fg_buffer, size, Buffer.default_fg
-    @bg_buffer = resize2d @bg_buffer, size, Buffer.default_bg
+    @contents[range]  = resize2d @contents[range] , size, " "
+    @fg_buffer[range] = resize2d @fg_buffer[range], size, Buffer.default_fg
+    @bg_buffer[range] = resize2d @bg_buffer[range], size, Buffer.default_bg
   end
 
   def on_dirty(&block)

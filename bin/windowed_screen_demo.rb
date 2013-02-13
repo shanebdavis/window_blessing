@@ -65,7 +65,7 @@ WindowedScreen.new.start(:full=>true, :utf8 => true) do |screen|
   root_window.add_child gray_win = gray_window(rect(10,10,25,13))
   root_window.add_child color_win = color_window(rect(30,15,24,12))
   root_window.add_child Label.new rect(point,point(1000,1)),
-    " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Q to quit.",
+    " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Ctrl-Q to quit.",
     :bg => color(0.25)
 
 end

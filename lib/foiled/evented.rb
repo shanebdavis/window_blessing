@@ -11,6 +11,7 @@ module Evented
   end
 
   def handle_event(event)
+    event[:object] = self
     event_manager.handle_event(event)
   end
 
