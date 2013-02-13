@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency 'babel_bridge'
+  gem.add_dependency 'babel_bridge', ">= 0.5.3"
   gem.add_dependency 'gui_geometry', ">= 0.2.2"
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
