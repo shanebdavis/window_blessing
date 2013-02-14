@@ -1,6 +1,6 @@
 require "gui_geometry"
 
-module Foiled
+module WindowBlessing
 module Tools
   include GuiGeo::Tools
 
@@ -117,8 +117,8 @@ module Tools
   end
 
   def log(str); XtermLog.log "#{self.inspect}: #{str}" end
-  def color(*args); Foiled::Color.new *args end
-  def window(*args); Foiled::Window.new *args end
-  def buffer(*args); Foiled::Buffer.new *args end
+  def color(*args); WindowBlessing::Color.new *args end
+  def window(*args); WindowBlessing::Window.new *args end
+  def buffer(*args); WindowBlessing::Buffer.new *args end
 end
 end

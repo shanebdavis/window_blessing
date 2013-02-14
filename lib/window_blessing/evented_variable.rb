@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 
 # There are two events to subscribe to on evented variables:
 #

@@ -6,7 +6,7 @@ For example, it's actually going to be faster to draw a sub-region from one buff
 NOTE: I'm just making intelligent guesses here. Haven't actually profiled. It keeps the code simpler, too.
 
 =end
-module Foiled
+module WindowBlessing
 class Buffer
   include Tools
 

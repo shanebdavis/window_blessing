@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 module Evented
   def event_manager
     @event_manager ||= EventManager.new(self)

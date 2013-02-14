@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
+require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 include GuiGeo
 
-Foiled::XtermScreen.new.start(:full=>true) do |screen|
+WindowBlessing::XtermScreen.new.start(:full=>true) do |screen|
   event_manager = screen.event_manager
 
   last_event = nil
@@ -27,7 +27,7 @@ Foiled::XtermScreen.new.start(:full=>true) do |screen|
 
   event_manager.add_handler do |event|
     event_count += 1
-    Foiled::XtermLog.log "last_event = #{event.inspect}"
+    WindowBlessing::XtermLog.log "last_event = #{event.inspect}"
     last_event = event
   end
 end

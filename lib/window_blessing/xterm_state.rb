@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 class XtermState
   attr_accessor :state
 

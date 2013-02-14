@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 module Widgets
 module DraggableBackground
 

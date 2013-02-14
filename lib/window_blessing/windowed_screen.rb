@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 
 class WindowedScreen < XtermScreen
   attr_accessor :root_window

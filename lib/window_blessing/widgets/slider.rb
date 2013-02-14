@@ -1,6 +1,6 @@
-module Foiled
+module WindowBlessing
 module Widgets
-class Slider < Foiled::Window
+class Slider < WindowBlessing::Window
   include Evented
   attr_reader :background, :evented_value
   attr_accessor :key_press_step

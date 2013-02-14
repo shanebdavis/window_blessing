@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
-require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
+require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 include GuiGeo
-include Foiled::Tools
+include WindowBlessing::Tools
 
 def colorful_buffer(size)
-  Foiled::Buffer.new(size).tap do |buffer|
+  WindowBlessing::Buffer.new(size).tap do |buffer|
     size.y.times do |y|
       size.x.times do |x|
         c1 = rgb_screen_color y / (size.y-1).to_f, x / (size.x-1).to_f, 0
@@ -16,7 +16,7 @@ def colorful_buffer(size)
 end
 
 def gray_buffer(size)
-  Foiled::Buffer.new(size).tap do |buffer|
+  WindowBlessing::Buffer.new(size).tap do |buffer|
     size.y.times do |y|
       size.x.times do |x|
         g1 = gray_screen_color(x / (size.x-1).to_f)
@@ -28,12 +28,12 @@ def gray_buffer(size)
 end
 
 def draw_instructions(screen)
-  b = Foiled::Buffer.new point(screen.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Ctrl-Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
+  b = WindowBlessing::Buffer.new point(screen.state.size.x,1), contents: " Arrows, Home, End, PgUp, PgDown or drag with Mouse to move. Space to toggle. Ctrl-Q to quit.", bg: gray_screen_color(0.6), fg: rgb_screen_color(0.8,0.8,1.0)
 
   screen.screen_buffer.draw_buffer point, b
 end
 
-Foiled::BufferedScreen.new.start(:full=>true) do |screen|
+WindowBlessing::BufferedScreen.new.start(:full=>true) do |screen|
   r = rect 10, 10, 6, 3
 
   grayb = gray_buffer(point 23,12)
@@ -66,7 +66,7 @@ Foiled::BufferedScreen.new.start(:full=>true) do |screen|
   end
 
   screen.event_manager.add_handler :key_press do |event|
-    Foiled::XtermLog.log "key_press: #{event[:key]}"
+    WindowBlessing::XtermLog.log "key_press: #{event[:key]}"
     case event[:key]
     when :home      then r.loc.x = 0
     when :page_up   then r.loc.y = 0
@@ -80,13 +80,13 @@ Foiled::BufferedScreen.new.start(:full=>true) do |screen|
   end
 
   screen.event_manager.add_last_handler :resize do |event|
-    Foiled::XtermLog.log "#{__FILE__} resize: #{event.inspect}"
+    WindowBlessing::XtermLog.log "#{__FILE__} resize: #{event.inspect}"
     draw_instructions screen
     screen.screen_buffer.draw_buffer r.loc, demo_buffer
   end
 
   screen.event_manager.add_handler :pointer do |event|
-    Foiled::XtermLog.log "mouse: drag #{event[:loc]}"
+    WindowBlessing::XtermLog.log "mouse: drag #{event[:loc]}"
     r.loc = event[:loc] - demo_buffer.size/2
   end
 end

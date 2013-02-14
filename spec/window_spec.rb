@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Foiled
+module WindowBlessing
 describe "Window" do
   include Tools
 

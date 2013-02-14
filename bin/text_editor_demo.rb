@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
-require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
+require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 include GuiGeo
-include Foiled::Tools
-include Foiled
+include WindowBlessing::Tools
+include WindowBlessing
 include Widgets
 
 class Theme
-  include Foiled::Tools
+  include WindowBlessing::Tools
   COLORS = {
     background: color("ffc").to_screen_color,
     foreground: color(0.25).to_screen_color,

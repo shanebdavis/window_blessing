@@ -1,5 +1,5 @@
 
-module Foiled
+module WindowBlessing
 class XtermInput
   attr_reader :event_parser
 

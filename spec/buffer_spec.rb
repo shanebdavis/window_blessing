@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Foiled
+module WindowBlessing
 describe "Buffer" do
   include Tools
 

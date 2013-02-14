@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 class Color < Struct.new(:r, :g, :b)
   class <<self
 

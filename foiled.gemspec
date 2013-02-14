@@ -1,16 +1,16 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'foiled/version'
+require 'window_blessing/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "foiled"
-  gem.version       = Foiled::VERSION
+  gem.name          = "window_blessing"
+  gem.version       = WindowBlessing::VERSION
   gem.authors       = ["Shane Brinkman-Davis"]
   gem.email         = ["shanebdavis@gmail.com"]
-  gem.description   = %q{Curses! Foiled again!}
-  gem.summary       = %q{A windowing framework for console apps.}
-  gem.homepage      = ""
+  gem.description   = "Forget Curses! Try Blessings instead! WindowBlessing is an evented windowing framework for terminal apps."
+  gem.summary       = ""
+  gem.homepage      = "https://github.com/shanebdavis/window_blessing"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }

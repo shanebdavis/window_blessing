@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 class XtermScreen
   include GuiGeo
   include GuiGeo::Tools

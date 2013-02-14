@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # encoding: UTF-8
-require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
+require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 include GuiGeo
-include Foiled
+include WindowBlessing
 include Widgets
 include Tools
 

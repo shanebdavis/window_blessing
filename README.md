@@ -1,4 +1,4 @@
-# Foiled
+# WindowBlessing
 
 TODO: Write a gem description
 
@@ -6,7 +6,7 @@ TODO: Write a gem description
 
 Add this line to your application's Gemfile:
 
-    gem 'foiled'
+    gem 'window_blessing'
 
 And then execute:
 
@@ -14,7 +14,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install foiled
+    $ gem install window_blessing
 
 ## Potentially useful Unicode characters
 

@@ -1,7 +1,7 @@
 # ref: http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
 # ref: http://www.vt100.net/docs/vt102-ug/chapter5.html
 
-module Foiled
+module WindowBlessing
 
 class XtermOutput
   module SetColor

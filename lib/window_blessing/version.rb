@@ -1,3 +1,3 @@
-module Foiled
+module WindowBlessing
   VERSION = "0.0.1"
 end

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
-require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib foiled})
+require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 
 
-Foiled.main do |main_window|
+WindowBlessing.main do |main_window|
 #  raise main_window.inspect
   (c1 = window(rect(10,10,15,7))).background='-='
   main_window.add_child c1

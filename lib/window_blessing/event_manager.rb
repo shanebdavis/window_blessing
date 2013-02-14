@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 
 # Event handlers are procs which have one input: the event.
 # There can be more than one handler per event-type. Handlers for the same event type are called in the reverse of the order they were added with add_handler.

@@ -1,6 +1,6 @@
-module Foiled
+module WindowBlessing
 module Widgets
-class TextField < Foiled::Window
+class TextField < WindowBlessing::Window
   NON_NEGATIVE_INTEGER_VALIDATOR = /^[0-9]*$/
   attr_accessor_with_redraw :cursor_bg, :cursor_pos
   attr_accessor :validator

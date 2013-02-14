@@ -33,10 +33,10 @@ See README for licence information.
   widgets/slider
   widgets/text_field
 }.each do |file|
-  require "foiled/#{file}"
+  require "window_blessing/#{file}"
 end
 
-module Foiled
+module WindowBlessing
   # Your code goes here...
 class << self
   include Tools

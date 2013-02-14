@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 class Window
   include Tools
 

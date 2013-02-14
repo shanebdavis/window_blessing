@@ -1,6 +1,6 @@
 require "babel_bridge"
 
-module Foiled
+module WindowBlessing
 class XtermEventParser < BabelBridge::Parser
   rule :root, many(:event) do
     def events

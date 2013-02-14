@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 
 class BufferedScreen < XtermScreen
   attr_accessor :screen_buffer

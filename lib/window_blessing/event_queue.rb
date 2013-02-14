@@ -1,4 +1,4 @@
-module Foiled
+module WindowBlessing
 class EventQueue
   attr_accessor :queue
 

@@ -1,6 +1,6 @@
-module Foiled
+module WindowBlessing
 module Widgets
-class Label < Foiled::Window
+class Label < WindowBlessing::Window
   attr_accessor_with_redraw :text, :fg, :bg
 
   def initialize(rect, text, fill_options={})
