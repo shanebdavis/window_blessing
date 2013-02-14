@@ -1,6 +1,6 @@
 # WindowBlessing
 
-TODO: Write a gem description
+Forget Curses! Try Blessings instead! WindowBlessing is an evented windowing framework for terminal apps.
 
 ## Installation
 
@@ -17,19 +17,19 @@ Or install it yourself as:
     $ gem install window_blessing
 
 ## Potentially useful Unicode characters
+http://www.csbruce.com/software/utf-8.html
 
-  "⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ "
-  http://www.csbruce.com/software/utf-8.html
-  "╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ ╈ ╉ ╊ ╋ "
-  "═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬"
-  "◠ ◡ ◦ ◧ ◨ ◩ ◪ ◫ ◬ ◭ ◮ "
-  "◰ ◱ ◲ ◳ ◴ ◵ ◶ ◷ ◸ ◹ ◺ ◿ "
-  "╬"
-   "▀▁▂▃▄▅▆▇█"
-   "▉▊▋▌▍▎▏▐"
-   "░▒▓"
-   "▔▕▖▗▘▙▚▛▜▝▞▟"
-   "▸▾"
+  * ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹
+  * ╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ ╈ ╉ ╊ ╋
+  * ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟ ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬
+  * ◠ ◡ ◦ ◧ ◨ ◩ ◪ ◫ ◬ ◭ ◮
+  * ◰ ◱ ◲ ◳ ◴ ◵ ◶ ◷ ◸ ◹ ◺ ◿
+  * ╬
+  * ▀▁▂▃▄▅▆▇█
+  * ▉▊▋▌▍▎▏▐
+  * ░▒▓
+  * ▔▕▖▗▘▙▚▛▜▝▞▟
+  * ▸▾
 
 ## Usage
 
