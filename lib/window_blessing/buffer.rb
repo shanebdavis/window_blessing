@@ -70,7 +70,10 @@ class Buffer
     @contents||=[]
     @fg_buffer||=[]
     @bg_buffer||=[]
-    @contents  = @contents.gsub(/[\x00-\x09\x11-\x1f]/,'?').split("\n") if @contents.kind_of?(String)
+    if @contents.kind_of?(String)
+      @contents = @contents.split("\n")
+      sanitize_contents
+    end
     @contents[range]  = resize2d @contents[range] , size, " "
     @fg_buffer[range] = resize2d @fg_buffer[range], size, Buffer.default_fg
     @bg_buffer[range] = resize2d @bg_buffer[range], size, Buffer.default_bg
