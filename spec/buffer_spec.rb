@@ -172,5 +172,41 @@ describe "Buffer" do
     f1.fg_buffer.should == [[7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7]]
     f1.bg_buffer.should == [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
   end
+
+  it "sanitize_contents" do
+    f1 = test_frame
+    f1.contents = "hi\t!\nthere"
+    f1.to_s.should == "hi?!\nther\n    \n    "
+    f1.contents[1]="boo\x00"
+    f1.to_s.should == "hi?!\nboo\x00\n    \n    "
+    f1.sanitize_contents 2..-1
+    f1.to_s.should == "hi?!\nboo\x00\n    \n    "
+    f1.sanitize_contents 1..1
+    f1.to_s.should == "hi?!\nboo?\n    \n    "
+  end
+
+  it "each_line" do
+    f1 = test_frame
+    f1.each_line.collect{|a|a}.should == [
+      ["1234", [7, 7, 7, 7], [0, 0, 0, 0]],
+      ["2345", [7, 7, 7, 7], [0, 0, 0, 0]],
+      ["3456", [7, 7, 7, 7], [0, 0, 0, 0]],
+      ["4567", [7, 7, 7, 7], [0, 0, 0, 0]]
+    ]
+  end
+
+  it "fg_buffer=" do
+    f1 = test_frame
+    f1.fg_buffer = [[8],[6,7,8]]
+    f1.fg_buffer.should == [[8, 7, 7, 7], [6, 7, 8, 7], [7, 7, 7, 7], [7, 7, 7, 7]]
+    f1.bg_buffer.should == [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+  end
+
+  it "bg_buffer=" do
+    f1 = test_frame
+    f1.bg_buffer = [[8],[6,7,8]]
+    f1.fg_buffer.should == [[7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7]]
+    f1.bg_buffer.should == [[8, 0, 0, 0], [6, 7, 8, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+  end
 end
 end

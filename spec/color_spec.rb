@@ -32,5 +32,19 @@ describe "Color" do
     color("#abc").to_hex.should == "#aabbcc"
     color("#abcdef").to_hex.should == "#abcdef"
   end
+
+  it "br" do
+    color("#fff").br.should == 1.0
+    color("#000").br.should == 0.0
+    (color("#ff7f00").br*100).to_i.should == 49
+  end
+
+  it "to_screen_color" do
+    color("#ff0").to_screen_color.should == 226
+    color("#011").to_screen_color.should == 16
+    color("#777").to_screen_color.should == 243
+    color("#000").to_screen_color.should == 0
+    color("#ffffff").to_screen_color.should == 15
+  end
 end
 end

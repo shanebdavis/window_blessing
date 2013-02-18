@@ -138,5 +138,13 @@ describe "Tools" do
     gen_array2d(point(3,3), [1, 2]).should == [[1,2,1], [2,1,2], [1,2,1]]
     gen_array2d(point(4,4), [1, 2, 3]).should == [[1, 2, 3, 1], [2, 3, 1, 2], [3, 1, 2, 3], [1,2,3,1]]
   end
+
+  it "clone_value" do
+    clone_value 0.5
+    clone_value 100
+    v2 = clone_value v1 = {foo:"bar"}
+    v1[:foo] = "baz"
+    v1[:foo].should_not == v2[:foo]
+  end
 end
 end
