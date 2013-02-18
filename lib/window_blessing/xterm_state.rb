@@ -5,7 +5,7 @@ class XtermState
   def initialize(event_manager)
     @state = {:size => point(-1,-1)}
 
-    event_manager.add_handler :xterm_state do |event|
+    event_manager.on :xterm_state do |event|
       state_type = event[:state_type]
       old_state = state[state_type]
       new_state = event[:state]

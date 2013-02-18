@@ -6,7 +6,7 @@ module Evented
 
   # define event handler
   def on(*args,&block)
-    event_manager.add_handler *args, &block
+    event_manager.on *args, &block
     self
   end
 

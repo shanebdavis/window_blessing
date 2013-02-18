@@ -15,6 +15,7 @@ module WindowBlessing
 # both :change and :refresh events only fire if the value actually changed
 class EventedVariable
   include Evented
+  include Tools
 
   def initialize(value)
     @value = value
@@ -27,6 +28,7 @@ class EventedVariable
   def get; clone_value(@value) end
 
   # update the value & trigger :change and :refresh events
+  # returns the old value
   def set(value)
     old_value = refresh(value)
     handle_event :type => :change, :old_value => old_value, :value => value if old_value != value

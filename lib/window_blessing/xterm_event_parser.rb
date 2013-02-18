@@ -121,12 +121,12 @@ class XtermEventParser < BabelBridge::Parser
       x -= 33
       y -= 33
       button_actions = {
-        32 => :button1_down, 33 => :button2_down, 34=> :button3_down, 35=>:button_up,
+        32 => [:button_down, 1], 33 => [:button_down, 2], 34=> [:button_down, 3], 35=>:button_up,
         64 => :drag,
         96 => :wheel_down, 97 => :wheel_up
       }
       {
-        type: [:pointer, button_actions[s&99]],
+        type: [:pointer, button_actions[s&99]].flatten,
         button: button_actions[s&99],
         state: s,
         loc: point(x,y)

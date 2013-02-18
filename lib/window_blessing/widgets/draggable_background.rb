@@ -4,7 +4,7 @@ module DraggableBackground
 
   def initialize(*args)
     super *args
-    on :pointer, :button1_down do |event| @mouse_offset = event[:loc] end
+    on :pointer, :button_down  do |event| @mouse_offset = event[:loc] end
     on :pointer, :drag         do |event| self.loc += event[:loc] - @mouse_offset end
   end
 

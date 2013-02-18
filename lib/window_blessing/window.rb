@@ -37,18 +37,22 @@ ENDCODE
   end
 
   # event is in parent-space
-  def pointer_event(event)
+  def route_pointer_event(event)
     focus
+    event = event.clone
     event[:loc] -= area.loc
+
     @pointer_focused ||= children.reverse_each.find do |child|
       child.pointer_inside? event[:loc]
     end || :background
-    if @pointer_focused==:background
+
+    if @pointer_focused == :background
       handle_event(event)
     else
-      @pointer_focused.pointer_event event
+      @pointer_focused.route_pointer_event event
     end
-    @pointer_focused = nil if event[:button] == :button_up
+
+    @pointer_focused = nil if event[:type][1] == :button_up
   end
 
   module KeyboardFocus
@@ -123,7 +127,10 @@ ENDCODE
     def size; area.size; end
     def size=(new_size) self.area = rect area.loc, new_size end
 
-    def pointer_inside?(loc) area.contains? loc end
+    def pointer_inside?(loc)
+      log "pointer_inside? #{loc}"
+      area.contains? loc
+    end
 
     def move_onscreen
       return unless parent
@@ -184,7 +191,7 @@ ENDCODE
     end
 
     def path
-      [parent && parent.path,"#{self.class}#{self.area}"].flatten.compact.join(',')
+      [parent && parent.path,"#{self.class}#{self.area}#{":"+name if name}"].flatten.compact.join(',')
     end
 
     def parent_path
@@ -197,19 +204,9 @@ ENDCODE
     Window.attr_accessor_with_redraw :bg, :fg
     attr_reader :requested_redraw_area, :buffer
 
-    # sometimes you want to know where redraw requests are coming from
-    # Since request_redraw_internal is recursive, you don't want to log the stack trace with every call - just the first one
-    # This will log a stack-trace once per call
-    def log_request_redraw_internal
-      trace = Kernel.caller
-      return if trace.count {|line| line["request_redraw_internal"]} > 1
-      log "request_redraw_internal trace @requested_redraw_area=#{@requested_redraw_area} path:#{path}\n  "+ trace.join("\n  ")
-    end
-
     def request_redraw_internal(area = internal_area)
       #return if @requested_redraw_area && @requested_redraw_area.contains?(area) - the color_picker demo's info label fails to update with this uncommented - why?
       @requested_redraw_area = internal_area | (area & @requested_redraw_area)
-      #log_request_redraw_internal
 
       request_redraw @requested_redraw_area
     end

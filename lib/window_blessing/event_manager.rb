@@ -1,13 +1,13 @@
 module WindowBlessing
 
 # Event handlers are procs which have one input: the event.
-# There can be more than one handler per event-type. Handlers for the same event type are called in the reverse of the order they were added with add_handler.
+# There can be more than one handler per event-type. Handlers for the same event type are called in the reverse of the order they were added with on.
 # Event handlers return a true value if they handled the event and no more handlers should be called.
 #
 # Events are hashs. The :type field is a symbol specifying the event type. Other key/values are event-specific
 #
 # Special handlers:
-#   :all => gets all (real) events. Returning true will NOT stop event processing.
+#   () => gets all (real) events. Returning true will NOT stop event processing.
 #       All gets access to the events first - and can alter them
 #       All does NOT get :tick events
 #   :unhandled_event => if the event has no handler, this handler is used instead. New event looks like this:
@@ -25,27 +25,23 @@ class EventManager
   end
 
   def init_standard_handlers
-    add_handler(:event_exception) do |e|
+    on(:event_exception) do |e|
       XtermLog.log "#{self.class}(parent=#{parent.inspect}): event_exception: #{e[:exception].inspect} event: #{e[:event].inspect}"
       XtermLog.log "  "+ e[:exception].backtrace.join("\n  ")
     end
-    add_handler(){}
+    on(){}
   end
 
   def inspect
     "<#{self.class} :parent => #{parent.inspect} :handled_events => #{event_handlers.keys}>"
   end
 
-  def on_event_exception(&block) add_handler(:event_exception, &block) end
-  def on_every_event(&block); add_handler(&block) end
-  def on_unhandled_event(&block) add_handler(:unhandled_event, &block) end
-
-  def add_handler(*event_type, &block)
+  def on(*event_type, &block)
     event_handlers[event_type] ||= []
     event_handlers[event_type] << block
   end
 
-  def add_last_handler(*event_type, &block)
+  def on_last(*event_type, &block)
     event_handlers[event_type] = [block] + (event_handlers[event_type] || [])
   end
 

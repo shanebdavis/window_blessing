@@ -7,11 +7,11 @@ class BufferedScreen < XtermScreen
     super
     @screen_buffer = Buffer.new point(20,20)
 
-    event_manager.add_handler :tick do
+    event_manager.on :tick do
       update_from_screen_buffer
     end
 
-    event_manager.add_handler :resize do |event|
+    event_manager.on :resize do |event|
       @screen_buffer = Buffer.new event[:size]
       @screen_buffer.dirty
     end

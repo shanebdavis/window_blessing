@@ -46,7 +46,7 @@ WindowBlessing::BufferedScreen.new.start(:full=>true) do |screen|
   r.size = demo_buffer.size
   old_r = r.clone
 
-  screen.event_manager.add_handler :tick do |event|
+  screen.event_manager.on :tick do |event|
     if r != old_r
       r = rect(point(0,1), screen.state.size-point(0,1)).bound(r)
       if r != old_r
@@ -57,7 +57,7 @@ WindowBlessing::BufferedScreen.new.start(:full=>true) do |screen|
     end
   end
 
-  screen.event_manager.add_handler :characters do |event|
+  screen.event_manager.on :characters do |event|
     case event[:raw]
     when " " then
       demo_buffer = demo_buffer == grayb ? colorb : grayb
@@ -65,7 +65,7 @@ WindowBlessing::BufferedScreen.new.start(:full=>true) do |screen|
     end
   end
 
-  screen.event_manager.add_handler :key_press do |event|
+  screen.event_manager.on :key_press do |event|
     WindowBlessing::XtermLog.log "key_press: #{event[:key]}"
     case event[:key]
     when :home      then r.loc.x = 0
@@ -85,7 +85,7 @@ WindowBlessing::BufferedScreen.new.start(:full=>true) do |screen|
     screen.screen_buffer.draw_buffer r.loc, demo_buffer
   end
 
-  screen.event_manager.add_handler :pointer do |event|
+  screen.event_manager.on :pointer do |event|
     WindowBlessing::XtermLog.log "mouse: drag #{event[:loc]}"
     r.loc = event[:loc] - demo_buffer.size/2
   end

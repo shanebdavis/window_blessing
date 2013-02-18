@@ -8,7 +8,7 @@ WindowBlessing::XtermScreen.new.start(:full=>true) do |screen|
   last_event = nil
   event_count = 0
 
-  event_manager.add_handler :tick do
+  event_manager.on :tick do
     screen.output.instance_eval do
       cursor(0,0)
       reset_color
@@ -25,7 +25,7 @@ WindowBlessing::XtermScreen.new.start(:full=>true) do |screen|
     end
   end
 
-  event_manager.add_handler do |event|
+  event_manager.on do |event|
     event_count += 1
     WindowBlessing::XtermLog.log "last_event = #{event.inspect}"
     last_event = event
