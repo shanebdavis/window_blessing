@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = WindowBlessing::VERSION
   gem.authors       = ["Shane Brinkman-Davis"]
   gem.email         = ["shanebdavis@gmail.com"]
-  gem.description   = "Forget Curses! Try Blessings instead! WindowBlessing is an evented windowing framework for terminal apps."
+  gem.description   = "Forget Curses! Try Blessings! WindowBlessing is an evented, windowing framework for terminal apps."
   gem.summary       = ""
   gem.homepage      = "https://github.com/shanebdavis/window_blessing"
 

@@ -176,6 +176,8 @@ class Buffer
     fg = fg.to_screen_color if fg.kind_of?(Color)
     bg = bg.to_screen_color if bg.kind_of?(Color)
 
+    return if area.size==point
+
     if area != internal_area
       @contents  = overlay2d(area.loc, gen_array2d(area.size, string), contents)  if string
       @fg_buffer = overlay2d(area.loc, gen_array2d(area.size, fg),     fg_buffer) if fg

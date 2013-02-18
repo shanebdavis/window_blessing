@@ -1,5 +1,6 @@
 module WindowBlessing
 class Color < Struct.new(:r, :g, :b)
+  include Tools
   class <<self
 
     def black;  Color.new(0) end

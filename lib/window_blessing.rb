@@ -11,8 +11,8 @@ See README for licence information.
 
 %w{
   constants
-  color
   tools
+  color
   buffer
   version
   event_queue

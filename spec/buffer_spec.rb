@@ -47,6 +47,12 @@ describe "Buffer" do
     fb.to_s.should == "----\n----\n----\n----"
   end
 
+  it "fill out of bounds" do
+    fb = buffer(point(4,4))
+    fb.fill :area => rect(0,-4,1,1), :string => "-", :bg=>color(0,0,0)
+    fb.to_s.should == "    \n    \n    \n    "
+  end
+
   it "cropped fill" do
     (f=test_frame).cropped(rect(1,1,2,1)) do
       f.fill :string => '-'
