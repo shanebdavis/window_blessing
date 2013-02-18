@@ -1,3 +1,9 @@
+vXXX
+
+  + EventManager#on_event_exception
+  + EventManager#on_every_event
+  + EventManager#on_unhandled_event
+
 v0.0.2, 2013-02-17
 
   BugFixes

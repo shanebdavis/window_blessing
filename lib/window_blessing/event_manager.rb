@@ -20,6 +20,11 @@ class EventManager
   def initialize(parent)
     @parent = parent
     @event_handlers = {}
+
+    init_standard_handlers
+  end
+
+  def init_standard_handlers
     add_handler(:event_exception) do |e|
       XtermLog.log "#{self.class}(parent=#{parent.inspect}): event_exception: #{e[:exception].inspect} event: #{e[:event].inspect}"
       XtermLog.log "  "+ e[:exception].backtrace.join("\n  ")
@@ -30,6 +35,10 @@ class EventManager
   def inspect
     "<#{self.class} :parent => #{parent.inspect} :handled_events => #{event_handlers.keys}>"
   end
+
+  def on_event_exception(&block) add_handler(:event_exception, &block) end
+  def on_every_event(&block); add_handler(&block) end
+  def on_unhandled_event(&block) add_handler(:unhandled_event, &block) end
 
   def add_handler(*event_type, &block)
     event_handlers[event_type] ||= []
