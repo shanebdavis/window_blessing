@@ -15,7 +15,7 @@ class XtermScreen
     @event_queue = EventQueue.new
 
     @event_manager.on :key_press do |event|
-      quit if event[:key]==:control_q
+      quit if event[:control] && event[:key]==:q
     end
   end
 

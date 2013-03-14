@@ -22,12 +22,10 @@ class WindowedScreen < XtermScreen
 
     event_manager.on :tick do
       if redraw_area = root_window.requested_redraw_area
-        time(:redraw, "size=#{redraw_area.size}.area = #{redraw_area.size.x * redraw_area.size.y}") do
-          root_window.draw
-          buffer = root_window.buffer
-          output.draw_buffer buffer.dirty_area.loc, buffer.dirty_subbuffer if buffer.dirty_area
-          buffer.clean
-        end
+        root_window.draw
+        buffer = root_window.buffer
+        output.draw_buffer buffer.dirty_area.loc, buffer.dirty_subbuffer if buffer.dirty_area
+        buffer.clean
       end
     end
 

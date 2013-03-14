@@ -3,6 +3,9 @@ vXXX
   + EventManager#on_event_exception
   + EventManager#on_every_event
   + EventManager#on_unhandled_event
+  + simplified keyboard event modifier encoding (shift/alt/control)
+  + fixed keyboard modifiers for pageup/down/home/end & f5-f10
+  - redraw time log
 
 v0.0.2, 2013-02-17
 
