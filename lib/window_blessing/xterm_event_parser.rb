@@ -61,8 +61,8 @@ class XtermEventParser < BabelBridge::Parser
   rule(:key_press, "\e", :modifier, "Q")  {def key;:f2;end}
   rule(:key_press, "\e", :modifier, "R")  {def key;:f3;end}
   rule(:key_press, "\e", :modifier, "S")  {def key;:f4;end}
-  rule(:key_press, "\e", :modifier, "F")  {def key;:home;end;}
-  rule(:key_press, "\e", :modifier, "H")  {def key;:end;end; }
+  rule(:key_press, "\e", :modifier, "F")  {def key;:end;end;}
+  rule(:key_press, "\e", :modifier, "H")  {def key;:home;end; }
 
   rule :modifier, "\e", :modifier do
     def modifiers

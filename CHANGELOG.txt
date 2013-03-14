@@ -1,5 +1,6 @@
 vXXX
 
+  + EventedVariable@before_filter
   + EventManager#on_event_exception
   + EventManager#on_every_event
   + EventManager#on_unhandled_event

@@ -21,6 +21,12 @@ class EventedVariable
     @value = value
   end
 
+  # set a block to be called to processes the set value
+  # block should return the processed value
+  def before_filter(&block)
+    @before_filter = block
+  end
+
   def inspect
     "<#{self.class}:#{object_id} value:#{@value.inspect}>"
   end
@@ -31,7 +37,7 @@ class EventedVariable
   # returns the old value
   def set(value)
     old_value = refresh(value)
-    handle_event :type => :change, :old_value => old_value, :value => value if old_value != value
+    handle_event :type => :change, :old_value => old_value, :value => @value if old_value != @value
     old_value
   end
 
@@ -39,6 +45,7 @@ class EventedVariable
   # subscribe to :refresh events if you need to know when the value changes, but you shouldn't change any model-state because of it
   # if you are changing model-state, subscribe to :change
   def refresh(value)
+    value = @before_filter.call(value,@value) if @before_filter
     old_value = @value
     @value = value
     handle_event :type => :refresh, :old_value => old_value, :value => value if old_value != value
