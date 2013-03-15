@@ -120,5 +120,15 @@ module Tools
   def color(*args); WindowBlessing::Color.new *args end
   def window(*args); WindowBlessing::Window.new *args end
   def buffer(*args); WindowBlessing::Buffer.new *args end
+
+  def range_length(range)
+    if (range.last < 0 && range.first >=0) || (range.last >=0 && range.first < 0) # length depends on the string or array the range is applied to
+      nil
+    else
+      l = range.last - range.first
+      l += 1 unless range.exclude_end?
+      l
+    end
+  end
 end
 end

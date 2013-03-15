@@ -67,6 +67,8 @@ class Buffer
   end
 
   def normalize(range=0..-1)
+    ranged_size = size
+    ranged_size.y = range_length(range) || size.y
     @contents||=[]
     @fg_buffer||=[]
     @bg_buffer||=[]
@@ -74,9 +76,9 @@ class Buffer
       @contents = @contents.split("\n")
       sanitize_contents
     end
-    @contents[range]  = resize2d @contents[range] , size, " "
-    @fg_buffer[range] = resize2d @fg_buffer[range], size, Buffer.default_fg
-    @bg_buffer[range] = resize2d @bg_buffer[range], size, Buffer.default_bg
+    @contents[range]  = resize2d @contents[range] , ranged_size, " "
+    @fg_buffer[range] = resize2d @fg_buffer[range], ranged_size, Buffer.default_fg
+    @bg_buffer[range] = resize2d @bg_buffer[range], ranged_size, Buffer.default_bg
   end
 
   def on_dirty(&block)

@@ -146,5 +146,14 @@ describe "Tools" do
     v1[:foo] = "baz"
     v1[:foo].should_not == v2[:foo]
   end
+
+  it "range_length" do
+    range_length(0..-1).should == nil
+    range_length(-1..0).should == nil
+    range_length(-2..-1).should == 2
+    range_length(0..2).should == 3
+    range_length(1..2).should == 2
+    range_length(1...2).should == 1
+  end
 end
 end

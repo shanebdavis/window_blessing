@@ -208,5 +208,15 @@ describe "Buffer" do
     f1.fg_buffer.should == [[7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7], [7, 7, 7, 7]]
     f1.bg_buffer.should == [[8, 0, 0, 0], [6, 7, 8, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
   end
+
+  it "normalize range" do
+    f1 = buffer point(2,4)
+    f1.fill bg:255
+    f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
+    f1.normalize 1..2
+    f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
+    f1.normalize 1...2
+    f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
+  end
 end
 end
