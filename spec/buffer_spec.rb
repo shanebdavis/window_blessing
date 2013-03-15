@@ -210,13 +210,17 @@ describe "Buffer" do
   end
 
   it "normalize range" do
-    f1 = buffer point(2,4)
+    f1 = buffer(size = point(2,4))
     f1.fill bg:255
     f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
     f1.normalize 1..2
     f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
     f1.normalize 1...2
     f1.bg_buffer.should == [[255,255],[255,255],[255,255],[255,255]]
+    f1.size.should == size
+    f1.contents.length.should == size.y
+    f1.fg_buffer.length.should == size.y
+    f1.bg_buffer.length.should == size.y
   end
 end
 end

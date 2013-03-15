@@ -67,7 +67,7 @@ class Buffer
   end
 
   def normalize(range=0..-1)
-    ranged_size = size
+    ranged_size = size.clone
     ranged_size.y = range_length(range) || size.y
     @contents||=[]
     @fg_buffer||=[]
