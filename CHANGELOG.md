@@ -7,6 +7,7 @@ Improvement
 Added
 
  * EventedVariable#before_filter
+ * :fg and :bg options to Buffer#normalize
  * EventManager#on_event_exception
  * EventManager#on_every_event
  * EventManager#on_unhandled_event
