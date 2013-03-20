@@ -140,9 +140,10 @@ describe "Tools" do
   end
 
   it "clone_value" do
-    clone_value 0.5
-    clone_value 100
-    v2 = clone_value v1 = {foo:"bar"}
+    clone_value(0.5).should == 0.5
+    clone_value(nil).should == nil
+    clone_value(100).should == 100
+    v2 = clone_value v1 = {foo: "bar"}
     v1[:foo] = "baz"
     v1[:foo].should_not == v2[:foo]
   end
