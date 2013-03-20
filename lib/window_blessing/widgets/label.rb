@@ -13,7 +13,7 @@ class Label < WindowBlessing::Window
 
   def pointer_inside?(loc) false; end
 
-  def draw_internal
+  def draw_background
     buffer.contents = text
     buffer.fill :fg => fg, :bg => bg
   end

@@ -26,6 +26,7 @@ See README for licence information.
   xterm_input
   xterm_screen
   buffered_screen
+  window_redraw_areas
   window
   windowed_screen
   widgets/draggable_background
@@ -37,7 +38,6 @@ See README for licence information.
 end
 
 module WindowBlessing
-  # Your code goes here...
 class << self
   include Tools
   def main(&block)

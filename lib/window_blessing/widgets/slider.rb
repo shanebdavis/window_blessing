@@ -39,9 +39,17 @@ class Slider < WindowBlessing::Window
     end
   end
 
-  def draw_internal
+  def handle_area
+    rect(point(handle_x,0),point(1,1))
+  end
+
+  def draw_handle
+    buffer.fill :area => handle_area, :string => "+"
+  end
+
+  def draw_background
     super
-    buffer.fill :area => rect(point(handle_x,0),point(1,1)), :string => "+"
+    draw_handle
   end
 
   def handle_x;           (value * screen_value_range).to_i end

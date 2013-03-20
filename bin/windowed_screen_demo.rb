@@ -11,7 +11,7 @@ class DragWindow < Window
   def initialize(loc,buffer)
     super rect(loc,buffer.size)
     @buffer.draw_buffer point, buffer
-    clean
+    clear_redraw_areas
 
     on :key_press do |event|
       XtermLog.log "key_press: #{event[:key]}"

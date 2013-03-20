@@ -121,16 +121,15 @@ ENDCODE
       end
     end
 
+    def internal_area; rect @area.size end
+
     def loc; area.loc; end
     def loc=(new_loc) self.area = rect new_loc, area.size end
 
     def size; area.size; end
     def size=(new_size) self.area = rect area.loc, new_size end
 
-    def pointer_inside?(loc)
-      log "pointer_inside? #{loc}"
-      area.contains? loc
-    end
+    def pointer_inside?(loc) area.contains? loc end
 
     def move_onscreen
       return unless parent
@@ -138,11 +137,8 @@ ENDCODE
       self.area = parent_area.bound(area)
     end
 
-    def internal_area; rect(@area.size); end
-
     private
     def resize_buffer(old_size)
-      @requested_redraw_area = internal_area | @requested_redraw_area if @requested_redraw_area
       if area.size <= old_size
         @buffer = @buffer.subbuffer(rect(area.size))
         request_redraw
@@ -202,22 +198,36 @@ ENDCODE
 
   module Drawing
     Window.attr_accessor_with_redraw :bg, :fg
-    attr_reader :requested_redraw_area, :buffer
+    attr_reader :redraw_areas, :buffer
+
+    def redraw_areas
+      (@redraw_areas && @redraw_areas.areas || [])
+    end
+
+    def add_redraw_area(area)
+      area = area | internal_area
+      (@redraw_areas ||= WindowRedrawAreas.new) << area
+      area
+    end
+
+    # return redraw_areas after clearing it (returns [] if none)
+    def clear_redraw_areas
+      ret = redraw_areas
+      @redraw_areas = nil
+      ret
+    end
 
     def request_redraw_internal(area = internal_area)
-      #return if @requested_redraw_area && @requested_redraw_area.contains?(area) - the color_picker demo's info label fails to update with this uncommented - why?
-      @requested_redraw_area = internal_area | (area & @requested_redraw_area)
-
-      request_redraw @requested_redraw_area
+      request_redraw add_redraw_area(area)
     end
 
     # ask the parent to redraw all, or, if area is set, some of the area covered by this window
     def request_redraw(redraw_area = nil)
       redraw_area ||= internal_area
-      parent && parent.request_redraw_internal(rect(redraw_area.loc + @area.loc, redraw_area.size))
+      parent && parent.request_redraw_internal(redraw_area + loc)
     end
 
-    def redraw_requested?; !!requested_redraw_area end
+    def redraw_requested?; redraw_areas.length > 0 end
 
     # Reset @buffer to the designated background. The default implementation resets it to the ' ' character with @bg and @fg colors.
     #
@@ -235,34 +245,30 @@ ENDCODE
     # NOTE: Buffer may have a cropping area set
     #
     # NOTE: Safe to override. Calling 'super' is optional.
-    def draw_internal
-      draw_background
-      children.each do |child|
-        child.draw buffer, (buffer.crop_area - child.loc)
+    def draw_internal(area = nil)
+      buffer.cropped(area) do
+        draw_background
+        children.each do |child|
+          child.draw buffer, buffer.crop_area - child.loc
+        end
       end
     end
 
-    # marks "redrawn_area" of @buffer "up to date" (redraw no longer required)
-    def clean(redrawn_area = @requested_redraw_area)
-      @requested_redraw_area = nil if redrawn_area && redrawn_area.contains?(@requested_redraw_area)
+    # perform the request redraws
+    # return the areas redrawn (returns [] if none)
+    def redraw
+      clear_redraw_areas.each {|area| draw_internal area}
     end
 
     # Draw the window:
     #
-    # 1) Draw the specified internal_area, or @requested_redraw_area by default, into @buffer
-    # 2) Draw @buffer to target_buffer (if set)
-    # 3) returns the internal_area that was updated
-    def draw(target_buffer = nil, internal_area = @requested_redraw_area)
-      internal_area = self.internal_area | internal_area
-
-      if internal_area.overlaps? @requested_redraw_area
-        buffer.cropped(internal_area | @requested_redraw_area) {draw_internal}
-        clean internal_area
-      end
-
-      target_buffer.draw_buffer(loc, buffer, internal_area) if target_buffer
-
-      internal_area
+    # 1) Draw all requested internal redraw areas, and clear all requests.
+    # 2) Draw @buffer to target_buffer. Optionally, only draw the specified internal_area.
+    # 3) return an array of internal areas redrawn
+    def draw(target_buffer = nil, internal_area = self.internal_area)
+      ret = redraw
+      target_buffer.draw_buffer loc, buffer, internal_area if target_buffer
+      ret
     end
   end
   include Drawing

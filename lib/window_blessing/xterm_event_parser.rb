@@ -112,34 +112,34 @@ class XtermEventParser < BabelBridge::Parser
     def event
       key = KEY_MAP_DECODER[number.to_i]
       {
-      :type => [:key_press, key],
-      :key => key
-      }.tap do |m|
-        m[:shift]=true if shift
-      end
+        :type => [:key_press, key],
+        :key => key,
+        :shift => !!shift
+      }
     end
   end
 
+  BUTTON_ACTIONS = {
+    32 => [:button_down, 1], 33 => [:button_down, 2], 34=> [:button_down, 3], 35=>:button_up,
+    64 => :drag,
+    96 => :wheel_down, 97 => :wheel_up
+  }
+
   rule :event, "\e[", "M", match(/.../).as(:state) do
+    include GuiGeo
     def event
       s, x, y = state.to_s.unpack "CCC"
       x -= 33
       y -= 33
-      button_actions = {
-        32 => [:button_down, 1], 33 => [:button_down, 2], 34=> [:button_down, 3], 35=>:button_up,
-        64 => :drag,
-        96 => :wheel_down, 97 => :wheel_up
-      }
       {
-        type: [:pointer, button_actions[s&99]].flatten,
-        button: button_actions[s&99],
-        state: s,
-        loc: point(x,y)
-      }.tap do |h|
-        h[:shift] = true if (s&4)!=0
-        h[:alt] = true if (s&8)!=0
-        h[:control] = true if (s&16)!=0
-      end
+        type:     [:pointer, BUTTON_ACTIONS[s&99]].flatten,
+        button:   BUTTON_ACTIONS[s&99],
+        state:    s,
+        loc:      point(x,y),
+        shift:    (s&4)!=0,
+        alt:      (s&8)!=0,
+        control:  (s&16)!=0,
+      }
     end
   end
 
@@ -149,6 +149,10 @@ class XtermEventParser < BabelBridge::Parser
       {:type => :unknown_xterm_code}
     end
   end
+
+  rule(:event, "\e") {def event; {type: [:key_press, :escape],  :key=>:escape} end}
+  rule(:event, "\r") {def event; {type: [:key_press, :enter],   :key=>:enter} end}
+  rule(:event, "\t") {def event; {type: [:key_press, :tab],     :key=>:tab} end}
 
   rule :event, /[\x00-\x1f]/ do
     def event

@@ -1,6 +1,6 @@
 # WindowBlessing
 
-Forget Curses! Try Blessings instead! WindowBlessing is an evented windowing framework for terminal apps.
+Forget curses. Try blessings instead. WindowBlessing is an evented windowing framework for terminal apps.
 
 ## Installation
 

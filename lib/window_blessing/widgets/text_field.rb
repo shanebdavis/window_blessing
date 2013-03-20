@@ -80,7 +80,7 @@ class TextField < WindowBlessing::Window
   def text; evented_value.get end
   def text=(t); evented_value.set(t) if !validator || t[validator] end
 
-  def draw_internal
+  def draw_background
     @cursor_pos = bound(0, @cursor_pos, text.length)
     buffer.contents = text
     buffer.fill :fg => fg, :bg => bg

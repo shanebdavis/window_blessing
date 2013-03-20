@@ -25,7 +25,7 @@ describe "Window" do
     w = window rect(0,0,4,4)
     c = window rect(1,1,1,2)
     c.buffer.contents = "*\n*"
-    c.clean
+    c.clear_redraw_areas
     w.add_child c
     w.draw
     w.buffer.to_s.should == "    \n *  \n *  \n    "
@@ -44,8 +44,8 @@ describe "Window" do
     w = window rect(0,0,4,4)
     (c1=w.add_child(window(rect(1,1,2,2)))).buffer.fill :string=>"*"
     (c2=w.add_child(window(rect(2,0,2,2)))).buffer.fill :string=>"@"
-    c1.clean
-    c2.clean
+    c1.clear_redraw_areas
+    c2.clear_redraw_areas
     w.draw
     w.buffer.to_s.should == "  @@\n *@@\n ** \n    "
   end

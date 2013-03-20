@@ -22,6 +22,7 @@ class FadeSlider < Slider
     end
     buffer.bg_buffer = size.y.times.collect {line.clone}
     buffer.fill :string => " ", :fg => value > 0.5 ? Color.black : Color.white
+    draw_handle
   end
 end
 

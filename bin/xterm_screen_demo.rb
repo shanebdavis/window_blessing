@@ -2,7 +2,8 @@
 require File.expand_path File.join(File.dirname(__FILE__), %w{.. lib window_blessing})
 include GuiGeo
 
-WindowBlessing::XtermScreen.new.start(:full=>true) do |screen|
+module WindowBlessing
+XtermScreen.new.start(:full=>true) do |screen|
   event_manager = screen.event_manager
 
   last_event = nil
@@ -27,7 +28,8 @@ WindowBlessing::XtermScreen.new.start(:full=>true) do |screen|
 
   event_manager.on do |event|
     event_count += 1
-    WindowBlessing::XtermLog.log "last_event = #{event.inspect}"
     last_event = event
+    XtermLog.log "#{last_event.inspect}.should == parse(#{(last_event[:raw]||last_event[:string]).inspect})"
   end
+end
 end

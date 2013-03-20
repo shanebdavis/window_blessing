@@ -203,7 +203,7 @@ class Buffer
   end
 
   def draw_buffer(loc, buffer, source_area = nil)
-    source_area = (source_area || buffer.internal_area) | (crop_area - loc)
+    source_area = buffer.internal_area | source_area | (crop_area - loc)
     return unless source_area.present?
 
     unless source_area == buffer.internal_area

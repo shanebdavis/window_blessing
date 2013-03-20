@@ -21,7 +21,7 @@ class WindowedScreen < XtermScreen
     @root_window.name = "root_window"
 
     event_manager.on :tick do
-      if redraw_area = root_window.requested_redraw_area
+      if root_window.redraw_requested?
         root_window.draw
         buffer = root_window.buffer
         output.draw_buffer buffer.dirty_area.loc, buffer.dirty_subbuffer if buffer.dirty_area
