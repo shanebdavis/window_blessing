@@ -66,7 +66,10 @@ class Buffer
     @contents[range] = @contents[range].collect {|l| l.gsub(/[\x00-\x1f]/,'?')}
   end
 
-  def normalize(range=0..-1)
+  # options
+  #   :fg - color
+  #   :bg - color
+  def normalize(range=0..-1, options={})
     ranged_size = size.clone
     ranged_size.y = range_length(range) || size.y
     @contents||=[]
@@ -77,8 +80,8 @@ class Buffer
       sanitize_contents
     end
     @contents[range]  = resize2d @contents[range] , ranged_size, " "
-    @fg_buffer[range] = resize2d @fg_buffer[range], ranged_size, Buffer.default_fg
-    @bg_buffer[range] = resize2d @bg_buffer[range], ranged_size, Buffer.default_bg
+    @fg_buffer[range] = resize2d @fg_buffer[range], ranged_size, options[:fg] || Buffer.default_fg
+    @bg_buffer[range] = resize2d @bg_buffer[range], ranged_size, options[:bg] || Buffer.default_bg
   end
 
   def on_dirty(&block)
