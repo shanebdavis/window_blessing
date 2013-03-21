@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'babel_bridge', ">= 0.5.3"
-  gem.add_dependency 'gui_geometry', ">= 0.2.2"
+  gem.add_dependency 'gui_geometry', ">= 0.3.1"
 
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'rspec'
