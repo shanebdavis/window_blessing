@@ -157,7 +157,7 @@ class XtermEventParser < BabelBridge::Parser
   rule :event, /[\x00-\x1f]/ do
     def event
       char = "%c"%(to_s.getbyte(0)+"`".getbyte(0))
-      {type: :key_press, key: char.to_sym, control: true}
+      {type: [:key_press, char.to_sym], key: char.to_sym, control: true}
     end
   end
 

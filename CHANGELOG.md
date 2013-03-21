@@ -23,6 +23,7 @@ Changed Events
  * Escape: [:key_press, :escape]
  * Enter: [:key_press, :enter]
  * Tab: [:key_press, :tab]
+ * Control-Letter: [:kre_press, :[letter]]
 
 ### v0.0.2, 2013-02-17
 
