@@ -110,9 +110,9 @@ class ColorPicker < Window
 
     color_ev.on(:change) do |event|
       color = event[:value]
-      r_ev.set color.r
-      g_ev.set color.g
-      b_ev.set color.b
+      r_ev.refresh color.r
+      g_ev.refresh color.g
+      b_ev.refresh color.b
       gray_ev.refresh color.br
 
       update_label
@@ -127,7 +127,7 @@ class ColorPicker < Window
   end
 
   def initialize *args
-    super rect(2,2,60,30)
+    super rect(2,2,60,18)
     self.bg = gray_screen_color 0.2
     self.fg = gray_screen_color 0.5
 
@@ -135,19 +135,24 @@ class ColorPicker < Window
 
     add_child Label.new(rect(2,0,100,1),"Color Picker - Ctrl-Q to quit", :bg => self.bg, :fg => self.fg)
 
-    @r_slider     = add_child FadeSlider.new(rect(10,area.size.y - 10,25,1), r_ev,    Color.black, Color.red  )
-    @g_slider     = add_child FadeSlider.new(rect(10,area.size.y - 8,25,1),  g_ev,    Color.black, Color.green)
-    @b_slider     = add_child FadeSlider.new(rect(10,area.size.y - 6,25,1),  b_ev,    Color.black, Color.blue )
-    @gray_slider  = add_child FadeSlider.new(rect(10,area.size.y - 4,25,1),  gray_ev, Color.black, Color.white)
+    @r_slider     = add_child FadeSlider.new(rect(area.size.x-15,9,12,1), r_ev,    Color.black, Color.red  )
+    @g_slider     = add_child FadeSlider.new(rect(area.size.x-15,10,12,1),  g_ev,    Color.black, Color.green)
+    @b_slider     = add_child FadeSlider.new(rect(area.size.x-15,11,12,1),  b_ev,    Color.black, Color.blue )
+    @gray_slider  = add_child FadeSlider.new(rect(area.size.x-15,12,12,1),  gray_ev, Color.black, Color.white)
 
     text_field_options = {:bg => color(0.1), :fg => Color.gray, :validator => /^[0-9]{0,3}$/}
-    @r_value_field = add_child TextField.new(rect(2,area.size.y - 10,5,1), "123", text_field_options)
-    @g_value_field = add_child TextField.new(rect(2,area.size.y - 8 ,5,1), "123", text_field_options)
-    @b_value_field = add_child TextField.new(rect(2,area.size.y - 6 ,5,1), "123", text_field_options)
+    @r_value_field = add_child TextField.new(rect(area.size.x - 15,14,4,1), "123", text_field_options)
+    @g_value_field = add_child TextField.new(rect(area.size.x - 15+4,14,4,1), "123", text_field_options)
+    @b_value_field = add_child TextField.new(rect(area.size.x - 15+8,14,4,1), "123", text_field_options)
 
-    @color2d          = add_child ColorPicker2D.new(rect(area.size.x-15,area.size.y-9,12,6), color_ev)
 
-    @color_preview    = add_child ColorPreview.new(rect(2,2,area.size.x - 20, area.size.y - 14), color_ev)
+    @r_value_field.fg = Color.red
+    @g_value_field.fg = Color.green
+    @b_value_field.fg = Color.blue
+
+    @color2d          = add_child ColorPicker2D.new(rect(area.size.x-15,2,12,6), color_ev)
+
+    @color_preview    = add_child ColorPreview.new(rect(2,2,area.size.x - 20, 13), color_ev)
 
     @color_info_label = add_child Label.new(rect(2,area.size.y - 2,100,1),"info", :bg => self.bg, :fg => rgb_screen_color(1,1,1))
 
